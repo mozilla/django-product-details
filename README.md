@@ -1,7 +1,7 @@
 Mozilla Product Details for Django
 ==================================
 
-*Mozilla Product Details* is a [library][readme] containing information about
+**Mozilla Product Details** is a [library][readme] containing information about
 the latest versions, localizations, etc. of Mozilla products (most notably
 Firefox, Firefox for mobile, and Thunderbird).
 
@@ -61,7 +61,7 @@ To update the data, execute this:
 You want to run this once manually after installing the app. To periodically
 pull in new data, you can make this a cron job.
 
-*Note:* Please be considerate of the server when adding a cron job. The data
+**Note:** Please be considerate of the server when adding a cron job. The data
 does not change often enough to warrant an update every minute or so. Most
 applications will run perfectly fine if you pull new data once a day or even
 less frequently. When in doubt, contact the author of this library.
@@ -78,7 +78,11 @@ The contents are perhaps best inspected using [IPython][ipython].
 
 Caveats / Known Issues
 ----------------------
-While the management task will not overwrite existing files if the server
-returns bogus data (i.e., an empty document or unparseable JSON data), this
-library will also never delete a JSON file that was completely removed from
-the server. This is unlikely to happen very often, though.
+* While the management task will not overwrite existing files if the server
+  returns bogus data (i.e., an empty document or unparseable JSON data), this
+  library will also never delete a JSON file that was completely removed from
+  the server. This is unlikely to happen very often, though.
+* If you import the feed somewhere, then remove the JSON files, running the
+  management command will still try to run all imports and fail because it
+  can't find the data. You'll need to comment out that import, run
+  ``update_product_details``, then comment it back in.

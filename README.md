@@ -74,15 +74,22 @@ To use the data, just import the library:
 The library turns all imported JSON files automatically into Python objects.
 The contents are perhaps best inspected using [IPython][ipython].
 
+It is discouraged to import the submodules directly like this:
+
+    # don't do this:
+    from product_details import firefox_versions, languages
+
+as it causes caveat #2 (see below).
+
 [ipython]: http://ipython.scipy.org/
 
 Caveats / Known Issues
 ----------------------
-* While the management task will not overwrite existing files if the server
-  returns bogus data (i.e., an empty document or unparseable JSON data), this
-  library will also never delete a JSON file that was completely removed from
-  the server. This is unlikely to happen very often, though.
-* If you import the feed somewhere, then remove the JSON files, running the
-  management command will still try to run all imports and fail because it
-  can't find the data. You'll need to comment out that import, run
-  ``update_product_details``, then comment it back in.
+1. While the management task will not overwrite existing files if the server
+   returns bogus data (i.e., an empty document or unparseable JSON data), this
+   library will also never delete a JSON file that was completely removed from
+   the server. This is unlikely to happen very often, though.
+2. If you import the feed somewhere, then remove the JSON files, running the
+   management command will still try to run all imports and fail because it
+   can't find the data. You'll need to comment out that import, run
+   ``update_product_details``, then comment it back in.

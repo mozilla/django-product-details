@@ -20,7 +20,10 @@ __version__ = '.'.join(map(str, VERSION))
 
 def settings_fallback(key):
     """Grab user-defined settings, or fall back to default."""
-    return getattr(settings, key, getattr(settings_defaults, key))
+    try:
+        return getattr(settings, key)
+    except (AttributeError, ImportError):
+        return getattr(settings_defaults, key)
 
 
 json_dir = settings_fallback('PROD_DETAILS_DIR')

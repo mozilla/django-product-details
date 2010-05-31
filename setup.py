@@ -15,6 +15,7 @@ setup(
     packages=['product_details'],
     include_package_data=True,
     zip_safe=False,
+    install_requires=['Django>=1.1'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

@@ -2,22 +2,31 @@ Mozilla Product Details for Django
 ==================================
 
 **Mozilla Product Details** is a [library][readme] containing information about
-the latest versions, localizations, etc. of Mozilla products (most notably
-Firefox, Firefox for mobile, and Thunderbird).
+the latest versions, localizations, etc. of [Mozilla][Mozilla] products (most
+notably Firefox, Firefox for mobile, and Thunderbird).
 
-This is a Django app allowing this data to be used in Django projects. A
-Django management command can be used as a cron job or called manually
-to keep the data in sync with Mozilla.
+From the original [README file][readme]:
 
+    This library holds information about the current builds of Firefox and
+    Thunderbird that Mozilla ships including:
+
+    - Latest version numbers for all builds
+    - English and Native names for all languages we support
+
+This is a [Django][Django] app allowing this data to be used in Django
+projects. A Django management command can be used as a cron job or called
+manually to keep the data in sync with Mozilla.
+
+[viewvc]: http://viewvc.svn.mozilla.org/vc/libs/product-details/
 [readme]: http://viewvc.svn.mozilla.org/vc/libs/product-details/README?view=markup
 [Mozilla]: http://www.mozilla.org
 [Django]: http://www.djangoproject.com/
 
 Why?
 ----
-The [data source][viewvc] of Mozilla Product Details is a PHP library kept
+The [data source][SVNsource] of Mozilla Product Details is a PHP library kept
 on the Mozilla SVN server, and was originally written so it could be included
-into PHP products via an [SVN external][SVNext]. A simple ``svn up`` would
+into PHP projects via an [SVN external][SVNext]. A simple ``svn up`` would
 fetch the latest data when it became available.
 
 In the meantime, the Product Details library received an additional JSON feed,
@@ -25,9 +34,9 @@ allowing non-PHP projects to consume the data. If, however, the consumer is
 not kept in SVN like the library is, there is no easy way to keep the data
 up to date.
 
-For Django projects, this app solved that problem.
+For Django projects, this app solves that problem.
 
-[viewvc]: http://viewvc.svn.mozilla.org/vc/libs/product-details/
+[SVNsource]: http://svn.mozilla.org/libs/product-details/
 [SVNext]: http://svnbook.red-bean.com/en/1.0/ch07s03.html
 
 Getting Started
@@ -79,7 +88,9 @@ It is discouraged to import the submodules directly like this:
     # don't do this:
     from product_details import firefox_versions, languages
 
-as it causes caveat #2 (see below).
+as it causes caveat #2 (see below). Alternatively, you could wrap it into a
+try/except block, or manually drop the JSON files into the target directory
+for the first time only.
 
 [ipython]: http://ipython.scipy.org/
 

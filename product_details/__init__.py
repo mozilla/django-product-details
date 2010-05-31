@@ -5,7 +5,11 @@ module attributes using locals().  It's a magical and wonderful process.
 import json
 import os
 
-from django.conf import settings
+# During install, we need this to pass even without Django present.
+try:
+    from django.conf import settings
+except ImportError:
+    settings = None
 
 from . import settings_defaults
 

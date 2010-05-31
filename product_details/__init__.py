@@ -16,6 +16,7 @@ from . import settings_defaults
 
 VERSION = (0, 2)
 __version__ = '.'.join(map(str, VERSION))
+__all__ = ['VERSION', '__version__']
 
 
 def settings_fallback(key):
@@ -33,3 +34,4 @@ for filename in os.listdir(json_dir):
         name = os.path.splitext(filename)[0]
         path = os.path.join(json_dir, filename)
         locals()[name] = json.load(open(path))
+        __all__.append(name)

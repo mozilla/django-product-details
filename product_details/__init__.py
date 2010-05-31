@@ -10,6 +10,10 @@ from django.conf import settings
 from . import settings_defaults
 
 
+VERSION = (0, 2)
+__version__ = '.'.join(map(str, VERSION))
+
+
 def settings_fallback(key):
     """Grab user-defined settings, or fall back to default."""
     return getattr(settings, key, getattr(settings_defaults, key))

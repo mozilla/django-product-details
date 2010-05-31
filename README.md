@@ -42,8 +42,12 @@ For Django projects, this app solves that problem.
 Getting Started
 ---------------
 ### Installing
-Install this library using ``easy_install`` or ``pip``, or by downloading
-the ``product_details`` directory and dropping it into your django project.
+Install this library using ``pip``:
+
+    pip install -e git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
+
+... or by downloading the ``product_details`` directory and dropping it into
+your django project.
 
 Add ``product_details`` to your ``INSTALLED_APPS`` to enable the management
 commands.

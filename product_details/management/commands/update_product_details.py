@@ -11,13 +11,14 @@ import time
 import urllib2
 from urlparse import urljoin
 
-from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
-from product_details import settings_defaults
+from ... import settings_fallback
 
 
-log = logging.getLogger('reporter.prod_details')
+log = logging.getLogger('prod_details')
+log.addHandler(logging.StreamHandler())
+log.setLevel(settings_fallback('LOG_LEVEL'))
 
 
 class Command(NoArgsCommand):
@@ -31,8 +32,6 @@ class Command(NoArgsCommand):
 
     def __init__(self, *args, **kwargs):
         # some settings
-        settings_fallback = lambda x: (
-            getattr(settings, x, getattr(settings_defaults, x)))
         self.PROD_DETAILS_DIR = settings_fallback('PROD_DETAILS_DIR')
         self.PROD_DETAILS_URL = settings_fallback('PROD_DETAILS_URL')
 

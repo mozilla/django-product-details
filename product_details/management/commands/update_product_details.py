@@ -102,10 +102,7 @@ class Command(NoArgsCommand):
         # Remember Last-Modified header.
         self.last_mod_response = resp.info()['Last-Modified']
 
-        listing_response = urllib2.urlopen(self.PROD_DETAILS_URL)
-        listing = listing_response.read()
-        json_files = set(re.findall(r'href="([^"]+.json)"', listing))
-
+        json_files = set(re.findall(r'href="([^"]+.json)"', resp.read()))
         return json_files
 
     def download_json_file(self, json_file):

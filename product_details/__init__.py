@@ -14,7 +14,7 @@ except ImportError:
 from . import settings_defaults
 
 
-VERSION = (0, 2)
+VERSION = (0, 3)
 __version__ = '.'.join(map(str, VERSION))
 __all__ = ['VERSION', '__version__']
 

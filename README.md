@@ -102,9 +102,23 @@ Caveats / Known Issues
 ----------------------
 1. While the management task will not overwrite existing files if the server
    returns bogus data (i.e., an empty document or unparseable JSON data), this
-   library will also never delete a JSON file that was completely removed from
+   library will also *never delete* a JSON file that was completely removed from
    the server. This is unlikely to happen very often, though.
 2. If you import the feed somewhere, then remove the JSON files, running the
-   management command will still try to run all imports and fail because it
+   management command will still try to *run all imports* and fail because it
    can't find the data. You'll need to comment out that import, run
    ``update_product_details``, then comment it back in.
+3. You don't want to ``import product_details`` in ``settings.py`` as that
+   would cause an import loop (since product\_details itself imports
+   ``django.conf.settings``). However, if you must, you can lazily wrap the
+   import like this, mitigating the problem:
+
+    from django.utils.functional import lazy
+
+    MY_LANGUAGES = ('en-US', 'de')
+    class LazyLangs(list):
+        def __new__(self):
+            import product_details
+            return [(lang.lower(), product_details.languages[lang]['native'])
+                    for lang in MY_LANGUAGES]
+    LANGUAGES = lazy(LazyLangs, list)()

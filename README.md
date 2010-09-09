@@ -82,19 +82,10 @@ less frequently. When in doubt, contact the author of this library.
 ### Using the data
 To use the data, just import the library:
 
-    import product_details
+    from product_details import product_details
 
 The library turns all imported JSON files automatically into Python objects.
 The contents are perhaps best inspected using [IPython][ipython].
-
-It is discouraged to import the submodules directly like this:
-
-    # don't do this:
-    from product_details import firefox_versions, languages
-
-as it causes caveat #2 (see below). Alternatively, you could wrap it into a
-try/except block, or manually drop the JSON files into the target directory
-for the first time only.
 
 [ipython]: http://ipython.scipy.org/
 
@@ -104,21 +95,17 @@ Caveats / Known Issues
    returns bogus data (i.e., an empty document or unparseable JSON data), this
    library will also *never delete* a JSON file that was completely removed from
    the server. This is unlikely to happen very often, though.
-2. If you import the feed somewhere, then remove the JSON files, running the
-   management command will still try to *run all imports* and fail because it
-   can't find the data. You'll need to comment out that import, run
-   ``update_product_details``, then comment it back in.
-3. You don't want to ``import product_details`` in ``settings.py`` as that
+2. You don't want to ``import product_details`` in ``settings.py`` as that
    would cause an import loop (since product\_details itself imports
    ``django.conf.settings``). However, if you must, you can lazily wrap the
    import like this, mitigating the problem:
 
-    from django.utils.functional import lazy
+        from django.utils.functional import lazy
 
-    MY_LANGUAGES = ('en-US', 'de')
-    class LazyLangs(list):
-        def __new__(self):
-            import product_details
-            return [(lang.lower(), product_details.languages[lang]['native'])
-                    for lang in MY_LANGUAGES]
-    LANGUAGES = lazy(LazyLangs, list)()
+        MY_LANGUAGES = ('en-US', 'de')
+        class LazyLangs(list):
+            def __new__(self):
+                from product_details import product_details
+                return [(lang.lower(), product_details.languages[lang]['native'])
+                        for lang in MY_LANGUAGES]
+        LANGUAGES = lazy(LazyLangs, list)()

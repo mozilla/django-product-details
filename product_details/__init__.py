@@ -23,6 +23,14 @@ log = logging.getLogger('product_details')
 log.setLevel(logging.WARNING)
 
 
+def settings_fallback(key):
+    """Grab user-defined settings, or fall back to default."""
+    try:
+        return getattr(settings, key)
+    except (AttributeError, ImportError):
+        return getattr(settings_defaults, key)
+
+
 class ProductDetails(object):
     """
     Main product details class. Implements the JSON files' content as
@@ -33,20 +41,13 @@ class ProductDetails(object):
     def __init__(self):
         """Load JSON files and keep them in memory."""
 
-        json_dir = self._settings_fallback('PROD_DETAILS_DIR')
+        json_dir = settings_fallback('PROD_DETAILS_DIR')
 
         for filename in os.listdir(json_dir):
             if filename.endswith('.json'):
                 name = os.path.splitext(filename)[0]
                 path = os.path.join(json_dir, filename)
                 self.json_data[name] = json.load(open(path))
-
-    def _settings_fallback(self, key):
-        """Grab user-defined settings, or fall back to default."""
-        try:
-            return getattr(settings, key)
-        except (AttributeError, ImportError):
-            return getattr(settings_defaults, key)
 
     def __getattr__(self, key):
         """Catch-all for access to JSON files."""

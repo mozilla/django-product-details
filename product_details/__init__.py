@@ -2,6 +2,7 @@
 When this module is imported, we load all the .json files and insert them as
 module attributes using locals().  It's a magical and wonderful process.
 """
+import collections
 import json
 import logging
 import os
@@ -55,12 +56,6 @@ class ProductDetails(object):
             return self.json_data[key]
         except KeyError:
             log.warn('Requested product details file %s not found!' % key)
-            return FakeDict()
+            return collections.defaultdict(lambda: None)
 
 product_details = ProductDetails()
-
-
-class FakeDict(dict):
-    """Fake dictionary that'll pretend to know every key."""
-    def __getitem__(self, key):
-        return None

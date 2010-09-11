@@ -3,6 +3,7 @@ When this module is imported, we load all the .json files and insert them as
 module attributes using locals().  It's a magical and wonderful process.
 """
 import collections
+import datetime
 import json
 import logging
 import os
@@ -57,5 +58,24 @@ class ProductDetails(object):
         except KeyError:
             log.warn('Requested product details file %s not found!' % key)
             return collections.defaultdict(lambda: None)
+
+    @property
+    def last_update(self):
+        """Return the last-updated date, if it exists."""
+
+        json_dir = settings_fallback('PROD_DETAILS_DIR')
+        file = os.path.join(json_dir, '.last_update')
+        try:
+            with open(file) as f:
+                d = f.read()
+        except IOError:
+            d = ''
+
+        try:
+            date = datetime.datetime.strptime(d, '%a, %d %b %Y %H:%M:%S %Z')
+        except ValueError:
+            date = None
+
+        return date
 
 product_details = ProductDetails()

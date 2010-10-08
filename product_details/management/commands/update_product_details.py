@@ -154,7 +154,13 @@ class Command(NoArgsCommand):
         tf.write(urllib2.urlopen(
             urljoin(self.PROD_DETAILS_URL, json_file)).read())
         tf.close()
-        os.chmod(tf.name, 0644)
+
+        # lchmod is available on BSD-based Unixes only.
+        if hasattr(os, 'lchmod'):
+            os.lchmod(tf.name, 0644)
+        else:
+            os.chmod(tf.name, 0644)
+
         shutil.move(tf.name, os.path.join(self.PROD_DETAILS_DIR, json_file))
 
         return True

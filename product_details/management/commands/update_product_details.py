@@ -154,7 +154,7 @@ class Command(NoArgsCommand):
         tf.write(urllib2.urlopen(
             urljoin(self.PROD_DETAILS_URL, json_file)).read())
         tf.close()
-        os.lchmod(tf.name, 0644)
+        os.chmod(tf.name, 0644)
         shutil.move(tf.name, os.path.join(self.PROD_DETAILS_DIR, json_file))
 
         return True

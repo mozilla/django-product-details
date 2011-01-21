@@ -26,6 +26,9 @@ class Command(NoArgsCommand):
                     default=False, help=(
                         'Download product details even if they have not been '
                         'updated since the last fetch.')),
+        make_option('-q', '--quiet', action='store_true', dest='quiet',
+                    default=False, help=(
+                        'If nothing has changed, swallow all output.')),
     )
 
     def __init__(self, *args, **kwargs):
@@ -37,6 +40,10 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         self.options = options
+
+        # Should we be quiet?
+        if self.options['quiet']:
+            log.setLevel(logging.WARNING)
 
         # Determine last update timestamp and check if we need to update again.
         if self.options['force']:

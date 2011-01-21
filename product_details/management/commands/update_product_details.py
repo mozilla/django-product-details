@@ -28,7 +28,7 @@ class Command(NoArgsCommand):
                         'updated since the last fetch.')),
         make_option('-q', '--quiet', action='store_true', dest='quiet',
                     default=False, help=(
-                        'If nothing has changed, swallow all output.')),
+                        'If no error occurs, swallow all output.')),
     )
 
     def __init__(self, *args, **kwargs):

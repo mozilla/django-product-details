@@ -14,7 +14,7 @@ try:
 except ImportError:
     settings = None
 
-from . import settings_defaults
+from product_details import settings_defaults
 
 
 VERSION = (0, 4)

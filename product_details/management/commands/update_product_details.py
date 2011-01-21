@@ -11,7 +11,7 @@ from urlparse import urljoin
 
 from django.core.management.base import NoArgsCommand, CommandError
 
-from ... import settings_fallback
+from product_details import settings_fallback
 
 
 log = logging.getLogger('prod_details')

@@ -19,7 +19,7 @@ from product_details import settings_defaults
 
 VERSION = (0, 4)
 __version__ = '.'.join(map(str, VERSION))
-__all__ = ['VERSION', '__version__', 'product_details']
+__all__ = ['VERSION', '__version__', 'product_details', 'version_compare']
 
 log = logging.getLogger('product_details')
 log.setLevel(logging.WARNING)

@@ -22,6 +22,7 @@ manually to keep the data in sync with Mozilla.
 [Mozilla]: http://www.mozilla.org
 [Django]: http://www.djangoproject.com/
 
+
 Why?
 ----
 The [data source][SVNsource] of Mozilla Product Details is a PHP library kept
@@ -38,6 +39,7 @@ For Django projects, this app solves that problem.
 
 [SVNsource]: http://svn.mozilla.org/libs/product-details/
 [SVNext]: http://svnbook.red-bean.com/en/1.0/ch07s03.html
+
 
 Getting Started
 ---------------
@@ -88,6 +90,27 @@ The library turns all imported JSON files automatically into Python objects.
 The contents are perhaps best inspected using [IPython][ipython].
 
 [ipython]: http://ipython.scipy.org/
+
+
+Version Compare
+---------------
+Product details comes with an implementation of version comparison code for
+Mozilla-style product versions. Use it like this:
+
+    >>> from product_details.version_compare import Version
+    >>> v1 = Version('4.0b10')
+    >>> v2 = Version('4.0b10pre')
+    >>> v1 < v2
+    False
+
+The second useful part of the version compare code is generating a list of
+unique versions, sorted by their release date, like this:
+
+    >>> from product_details import product_details
+    >>> from product_details.version_compare import version_list
+    >>> version_list(product_details.firefox_history_development_releases)
+    ['3.6.4', '3.6.3', '3.6', '3.6b5', '3.6b4', '3.6b3', '3.6b2', ... ]
+
 
 Caveats / Known Issues
 ----------------------

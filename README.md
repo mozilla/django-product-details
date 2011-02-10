@@ -132,3 +132,10 @@ Caveats / Known Issues
                 return [(lang.lower(), product_details.languages[lang]['native'])
                         for lang in MY_LANGUAGES]
         LANGUAGES = lazy(LazyLangs, list)()
+
+
+Development
+-----------
+Patches are welcome.
+
+To run tests, install ``nose`` and run ``nosetests`` from the project root.

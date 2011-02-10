@@ -1,0 +1,2 @@
+# Requirements for building tests
+nose

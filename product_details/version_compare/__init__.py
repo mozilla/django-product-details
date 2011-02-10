@@ -41,6 +41,9 @@ class Version(object):
         except AssertionError, e:
             raise ValueError('Error parsing version: %s' % e)
 
+    def __str__(self):
+        return str(self._version)
+
     def __cmp__(self, other):
         """Compare two versions."""
         assert isinstance(other, Version)

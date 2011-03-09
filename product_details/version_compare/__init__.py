@@ -71,12 +71,16 @@ class Version(object):
         return simplify_version(self._version)
 
 
-def version_list(releases, key=None, reverse=True, hide_below='0.0'):
+def version_list(releases, key=None, reverse=True, hide_below='0.0',
+                 filter=lambda v: True):
     """
     Build a sorted list of simplified versions.
 
     ``releases`` is expected to be a dictionary like:
         {'1.0': '2000-01-01'}
+
+    hide_below is the minimum version to be included in the list.
+    filter is a function that maps Version objects to "include? True/False".
     """
     if not key:
         key = lambda x: x[1]  # Default: Sort by release date.
@@ -85,7 +89,7 @@ def version_list(releases, key=None, reverse=True, hide_below='0.0'):
     versions = []
     for v, released in sorted(releases.items(), key=key, reverse=reverse):
         ver = Version(v)
-        if ver < lowest:
+        if ver < lowest or not filter(ver):
             continue
         versions.append(ver.simplified)
     return uniquifier(versions)

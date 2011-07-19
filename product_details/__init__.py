@@ -2,6 +2,7 @@
 When this module is imported, we load all the .json files and insert them as
 module attributes using locals().  It's a magical and wonderful process.
 """
+import codecs
 import collections
 import datetime
 import json
@@ -77,5 +78,25 @@ class ProductDetails(object):
             date = None
 
         return date
+
+    def get_regions(self, locale):
+        """
+        Get a list of region names for a specific locale as a
+        dictionary with country codes as keys and localized names as
+        values.
+        """
+        def json_file(name):
+            return os.path.join(settings_fallback('PROD_DETAILS_DIR'),
+                                'regions', '%s.json' % name)
+
+        filepath = json_file(locale)
+
+        if not os.path.exists(filepath):
+            filepath = json_file('en-US')
+            if not os.path.exists(filepath):
+                raise Exception('Unable to load region data')
+
+        with codecs.open(filepath, encoding='utf8') as fd:
+            return json.load(fd)
 
 product_details = ProductDetails()

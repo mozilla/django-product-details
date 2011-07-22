@@ -2,6 +2,7 @@
 When this module is imported, we load all the .json files and insert them as
 module attributes using locals().  It's a magical and wonderful process.
 """
+import codecs
 import collections
 import datetime
 import json
@@ -64,18 +65,40 @@ class ProductDetails(object):
         """Return the last-updated date, if it exists."""
 
         json_dir = settings_fallback('PROD_DETAILS_DIR')
-        file = os.path.join(json_dir, '.last_update')
-        try:
-            with open(file) as f:
-                d = f.read()
-        except IOError:
-            d = ''
+        fmt = '%a, %d %b %Y %H:%M:%S %Z'
+        dates = []
+        for directory in (json_dir, os.path.join(json_dir, 'regions')):
+            file = os.path.join(directory, '.last_update')
+            try:
+                with open(file) as f:
+                    d = f.read()
+            except IOError:
+                d = ''
 
-        try:
-            date = datetime.datetime.strptime(d, '%a, %d %b %Y %H:%M:%S %Z')
-        except ValueError:
-            date = None
+            try:
+                dates.append(datetime.datetime.strptime(d, fmt))
+            except ValueError:
+                dates.append(None)
 
-        return date
+        if None in dates:
+            return None
+        # For backwards compat., just return the date of the parent.
+        return dates[0]
+
+    def get_regions(self, locale):
+        """Loads regions json file into memory, but only as needed."""
+        for l in (locale, 'en-US'):
+            key = 'regions/%s' % l
+            path = os.path.join(settings_fallback('PROD_DETAILS_DIR'),
+                                'regions', '%s.json' % l)
+            if self.json_data.get(key):
+                return self.json_data.get(key)
+            if os.path.exists(path):
+                with codecs.open(path, encoding='utf8') as fd:
+                    self.json_data[key] = json.load(fd)
+                    return self.json_data[key]
+
+        raise IOError('Unable to load region data for %s or en-US' % locale)
+
 
 product_details = ProductDetails()

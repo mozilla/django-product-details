@@ -57,6 +57,10 @@ class ProductDetails(object):
         try:
             return self.json_data[key]
         except KeyError:
+            if not self.json_data:
+                raise ImportWarning('No product details data could be loaded.'
+                    ' Did you run manage.py update_product_details ?')
+
             log.warn('Requested product details file %s not found!' % key)
             return collections.defaultdict(lambda: None)
 

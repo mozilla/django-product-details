@@ -87,9 +87,11 @@ class ProductDetails(object):
 
     def get_regions(self, locale):
         """Loads regions json file into memory, but only as needed."""
+        lookup = [locale, 'en-US']
         if '-' in locale:
             fallback, _, _ = locale.partition('-')
-        for l in (locale, fallback, 'en-US'):
+            lookup.insert(1, fallback)
+        for l in lookup:
             key = 'regions/%s' % l
             path = os.path.join(settings_fallback('PROD_DETAILS_DIR'),
                                 'regions', '%s.json' % l)

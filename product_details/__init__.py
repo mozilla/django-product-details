@@ -9,6 +9,8 @@ import json
 import logging
 import os
 
+from django.core.cache import cache
+
 # During `pip install`, we need this to pass even without Django present.
 try:
     from django.conf import settings
@@ -18,7 +20,7 @@ except ImportError:
 from product_details import settings_defaults
 
 
-VERSION = (0, 5)
+VERSION = (0, 6)
 __version__ = '.'.join(map(str, VERSION))
 __all__ = ['VERSION', '__version__', 'product_details', 'version_compare']
 
@@ -50,15 +52,22 @@ class ProductDetails(object):
             if filename.endswith('.json'):
                 name = os.path.splitext(filename)[0]
                 path = os.path.join(json_dir, filename)
-                self.json_data[name] = json.load(open(path))
+                self._set_data(name, json.load(open(path)))
 
     def __getattr__(self, key):
         """Catch-all for access to JSON files."""
-        try:
-            return self.json_data[key]
-        except KeyError:
+        data = self._get_data(key)
+        if data is None:
             log.warn('Requested product details file %s not found!' % key)
-            return collections.defaultdict(lambda: None)
+            data = collections.defaultdict(lambda: None)
+        return data
+
+    def _set_data(self, key, data):
+        cache.set('product-details-%s' % key, data,
+                  settings_fallback('PROD_DETAILS_TTL'))
+
+    def _get_data(self, key, default=None):
+        return cache.get('product-details-%s' % key) or None
 
     @property
     def last_update(self):
@@ -95,12 +104,12 @@ class ProductDetails(object):
             key = 'regions/%s' % l
             path = os.path.join(settings_fallback('PROD_DETAILS_DIR'),
                                 'regions', '%s.json' % l)
-            if self.json_data.get(key):
-                return self.json_data.get(key)
+            if self._get_data(key):
+                return self._get_data(key)
             if os.path.exists(path):
                 with codecs.open(path, encoding='utf8') as fd:
-                    self.json_data[key] = json.load(fd)
-                    return self.json_data[key]
+                    self._set_data(key, json.load(fd))
+                    return self._get_data(key)
 
         raise IOError('Unable to load region data for %s or en-US' % locale)
 

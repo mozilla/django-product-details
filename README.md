@@ -55,9 +55,13 @@ Add ``product_details`` to your ``INSTALLED_APPS`` to enable the management
 commands.
 
 ### Configuration
-No configuration should be necessary. However, you can add and alter the
-following settings to your ``settings.py`` file if you disagree with the
-defaults:
+
+No configuration should be necessary. This uses Django's [caching
+framework][caching] to store the results. If left unconfigured, it
+will use a dummy cache that just stores it in memory.
+
+If needed, you can add and alter the following settings to your
+``settings.py`` file if you disagree with the defaults:
 
 * ``PROD_DETAILS_URL`` defaults to the JSON directory on the Mozilla SVN
   server. If you have a secondary mirror at hand, or you want this tool to
@@ -67,6 +71,20 @@ defaults:
   be writable by the user that'll execute the management command, and readable
   by the user running the Django project. Defaults to:
   ``.../install_dir_of_this_app/product_details/json/``
+* ``PROD_DETAILS_TTL`` is the time-to-live to set on the cache entry (defaults to 
+  1 day).
+
+It is recommended to use memcache for caching, and you can configure
+it with the following in your ``settings.py``:
+
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
+    }
+
+[caching]: https://docs.djangoproject.com/en/dev/topics/cache/?from=olddocs
 
 ### Updating the feed
 To update the data, execute this:

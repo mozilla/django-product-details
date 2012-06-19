@@ -18,6 +18,10 @@ except ImportError:
 from product_details import settings_defaults
 
 
+class MissingJSONData(IOError):
+    pass
+
+
 VERSION = (0, 5)
 __version__ = '.'.join(map(str, VERSION))
 __all__ = ['VERSION', '__version__', 'product_details', 'version_compare']
@@ -102,7 +106,8 @@ class ProductDetails(object):
                     self.json_data[key] = json.load(fd)
                     return self.json_data[key]
 
-        raise IOError('Unable to load region data for %s or en-US' % locale)
+        raise MissingJSONData('Unable to load region data for %s or en-US' %
+                              locale)
 
 
 product_details = ProductDetails()

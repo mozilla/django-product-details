@@ -21,6 +21,7 @@ log.setLevel(settings_fallback('LOG_LEVEL'))
 
 class Command(NoArgsCommand):
     help = 'Update Mozilla product details off SVN.'
+    requires_model_validation = False
     option_list = NoArgsCommand.option_list + (
         make_option('-f', '--force', action='store_true', dest='force',
                     default=False, help=(

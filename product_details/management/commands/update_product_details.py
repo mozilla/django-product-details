@@ -126,7 +126,7 @@ class Command(NoArgsCommand):
 
         Returns True on success, False otherwise.
         """
-        log.debug('Updating %s from server' % json_file)
+        log.info('Updating %s from server' % json_file)
 
         if not self.options['force']:
             headers = {'If-Modified-Since': self.last_update_local}

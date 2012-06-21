@@ -10,4 +10,4 @@ PROD_DETAILS_URL = 'http://svn.mozilla.org/libs/product-details/json/'
 PROD_DETAILS_DIR = os.path.join(os.path.dirname(__file__), 'json')
 
 # log level.
-LOG_LEVEL = logging.WARNING
+LOG_LEVEL = logging.INFO

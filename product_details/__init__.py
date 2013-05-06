@@ -1,7 +1,3 @@
-"""
-When this module is imported, we load all the .json files and insert them as
-module attributes using locals().  It's a magical and wonderful process.
-"""
 import codecs
 import collections
 import datetime
@@ -9,29 +5,18 @@ import json
 import logging
 import os
 
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-
-from product_details import settings_defaults
+from product_details.utils import DictCache, get_cache, settings_fallback
 
 
 class MissingJSONData(IOError):
     pass
 
 
-__version__ = '0.6'
+__version__ = '0.7'
 __all__ = ['__version__', 'product_details', 'version_compare']
 
 log = logging.getLogger('product_details')
 log.setLevel(logging.WARNING)
-
-
-def settings_fallback(key):
-    """Grab user-defined settings, or fall back to default."""
-    try:
-        return getattr(settings, key)
-    except (AttributeError, ImportError, ImproperlyConfigured):
-        return getattr(settings_defaults, key)
 
 
 class ProductDetails(object):
@@ -39,35 +24,65 @@ class ProductDetails(object):
     Main product details class. Implements the JSON files' content as
     attributes, e.g.: product_details.firefox_version_history .
     """
-    json_data = {}
+    _cache_key = 'prod-details:{0}'
 
-    def __init__(self):
-        """Load JSON files and keep them in memory."""
-
-        json_dir = settings_fallback('PROD_DETAILS_DIR')
-
-        for filename in os.listdir(json_dir):
-            if filename.endswith('.json'):
-                name = os.path.splitext(filename)[0]
-                path = os.path.join(json_dir, filename)
-                self.json_data[name] = json.load(open(path))
+    def __init__(self, json_dir=None, cache_name=None, cache_timeout=None):
+        self.json_dir = json_dir or settings_fallback('PROD_DETAILS_DIR')
+        self.cache_timeout = cache_timeout or settings_fallback('PROD_DETAILS_CACHE_TIMEOUT')
+        cache_name = cache_name or settings_fallback('PROD_DETAILS_CACHE_NAME')
+        self._cache = get_cache(cache_name)
 
     def __getattr__(self, key):
-        """Catch-all for access to JSON files."""
+        return self._get_json_data(key)
+
+    def _get_cache_key(self, key):
+        return self._cache_key.format(key)
+
+    def _get_json_file_data(self, key):
+        filename = os.path.join(self.json_dir, key + '.json')
         try:
-            return self.json_data[key]
-        except KeyError:
+            with codecs.open(filename, encoding='utf8') as json_file:
+                data = json.load(json_file)
+        except IOError:
             log.warn('Requested product details file %s not found!' % key)
-            return collections.defaultdict(lambda: None)
+            return None
+
+        return data
+
+    def _get_json_data(self, key):
+        """Catch-all for access to JSON files."""
+        cache_key = self._get_cache_key(key)
+        data = self._cache.get(cache_key)
+        if not data:
+            data = self._get_json_file_data(key)
+            if data is None:
+                data = collections.defaultdict(lambda: None)
+            else:
+                self._cache.set(cache_key, data, self.cache_timeout)
+
+        return data
+
+    def delete_cache(self, key):
+        """
+        Clears the cache for a specific file.
+
+        :param key: str file name with '.json' stripped off.
+        """
+        self._cache.delete(self._get_cache_key(key))
+
+    def clear_cache(self):
+        """
+        Clears the entire cache.
+        """
+        self._cache.clear()
 
     @property
     def last_update(self):
         """Return the last-updated date, if it exists."""
 
-        json_dir = settings_fallback('PROD_DETAILS_DIR')
         fmt = '%a, %d %b %Y %H:%M:%S %Z'
         dates = []
-        for directory in (json_dir, os.path.join(json_dir, 'regions')):
+        for directory in (self.json_dir, os.path.join(self.json_dir, 'regions')):
             file = os.path.join(directory, '.last_update')
             try:
                 with open(file) as f:
@@ -93,14 +108,9 @@ class ProductDetails(object):
             lookup.insert(1, fallback)
         for l in lookup:
             key = 'regions/%s' % l
-            path = os.path.join(settings_fallback('PROD_DETAILS_DIR'),
-                                'regions', '%s.json' % l)
-            if self.json_data.get(key):
-                return self.json_data.get(key)
-            if os.path.exists(path):
-                with codecs.open(path, encoding='utf8') as fd:
-                    self.json_data[key] = json.load(fd)
-                    return self.json_data[key]
+            data = self._get_json_data(key)
+            if data:
+                return data
 
         raise MissingJSONData('Unable to load region data for %s or en-US' %
                               locale)

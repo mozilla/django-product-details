@@ -1,6 +1,9 @@
 Mozilla Product Details for Django
 ==================================
 
+[![Travis](https://img.shields.io/travis/mozilla/django-product-details.svg)](https://travis-ci.org/mozilla/django-product-details/)
+[![PyPI](https://img.shields.io/pypi/v/django-mozilla-product-details.svg)](https://pypi.python.org/pypi/django-mozilla-product-details)
+
 **Mozilla Product Details** is a [library][readme] containing information about
 the latest versions, localizations, etc. of [Mozilla][Mozilla] products (most
 notably Firefox, Firefox for mobile, and Thunderbird).
@@ -67,6 +70,17 @@ defaults:
   be writable by the user that'll execute the management command, and readable
   by the user running the Django project. Defaults to:
   ``.../install_dir_of_this_app/product_details/json/``
+
+This app uses Django's cache framework to store the product data so that the 
+data can be updated on the site without requiring a server restart.
+The following settings will allow you to control how this works.
+
+* ``PROD_DETAILS_CACHE_NAME`` defaults to the cache in your ``CACHES`` setting called ``default``
+  (django provides an in-memory cache here by default).  If you provide a name of a cache 
+  configured in the Django configuration ``CACHES``, it will use that
+  cache to store the file data instead.
+* ``PROD_DETAILS_CACHE_TIMEOUT`` If set to an integer, it represents the number of seconds the cached data should be
+  kept per file. Defaults to 12 hours.
 
 ### Updating the feed
 To update the data, execute this:
@@ -138,4 +152,7 @@ Development
 -----------
 Patches are welcome.
 
-To run tests, install ``nose`` and run ``nosetests`` from the project root.
+To run tests, install ``tox`` and run ``tox`` from the project root. This will run
+the tests in Python 2.6 and 2.7. If you don't have both of those available, install
+``nose`` and ``Mock`` and run the tests in your current Python version by 
+running ``nosetests``.

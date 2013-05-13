@@ -9,6 +9,8 @@ import json
 import logging
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 # During `pip install`, we need this to pass even without Django present.
 try:
     from django.conf import settings
@@ -34,7 +36,7 @@ def settings_fallback(key):
     """Grab user-defined settings, or fall back to default."""
     try:
         return getattr(settings, key)
-    except (AttributeError, ImportError):
+    except (AttributeError, ImportError, ImproperlyConfigured):
         return getattr(settings_defaults, key)
 
 

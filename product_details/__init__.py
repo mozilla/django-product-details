@@ -9,13 +9,8 @@ import json
 import logging
 import os
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
-# During `pip install`, we need this to pass even without Django present.
-try:
-    from django.conf import settings
-except ImportError:
-    settings = None
 
 from product_details import settings_defaults
 
@@ -24,9 +19,8 @@ class MissingJSONData(IOError):
     pass
 
 
-VERSION = (0, 5)
-__version__ = '.'.join(map(str, VERSION))
-__all__ = ['VERSION', '__version__', 'product_details', 'version_compare']
+__version__ = '0.6'
+__all__ = ['__version__', 'product_details', 'version_compare']
 
 log = logging.getLogger('product_details')
 log.setLevel(logging.WARNING)

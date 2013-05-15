@@ -1,11 +1,22 @@
+import codecs
+import os.path
+import re
 from setuptools import setup
 
-import product_details
+
+def find_version(*file_paths):
+    version_file = codecs.open(os.path.join(os.path.dirname(__file__),
+                               *file_paths)).read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 
 setup(
     name='django-mozilla-product-details',
-    version=product_details.__version__,
+    version=find_version('product_details', '__init__.py'),
     description='Product and locale details for Mozilla products.',
     long_description=open('README.md').read(),
     author='Fred Wenzel',

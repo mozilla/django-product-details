@@ -4,3 +4,6 @@ pip-log.txt
 .DS_Store
 .last_update
 *.json
+*.egg-info
+build/
+dist/

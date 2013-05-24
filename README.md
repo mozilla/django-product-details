@@ -67,6 +67,15 @@ defaults:
   be writable by the user that'll execute the management command, and readable
   by the user running the Django project. Defaults to:
   ``.../install_dir_of_this_app/product_details/json/``
+* ``PROD_DETAILS_AUTO_RELOAD`` is a boolean that when ``True`` causes the modified
+  time of the JSON files to be checked when the data is accessed, and if it's
+  been updated since the modified time was last checked, it will reload the
+  file. Defaults to ``False``.
+    * The modified time is checked a maximum of once every
+      ``PROD_DETAILS_AUTO_RELOAD_TTL`` seconds (default 600).
+* The region data is updated far less often than the product, but if you'd like
+  it to auto update as well, you may set ``PROD_DETAILS_AUTO_RELOAD_REGIONS``
+  to ``True``. Defaults to ``False``.
 
 ### Updating the feed
 To update the data, execute this:

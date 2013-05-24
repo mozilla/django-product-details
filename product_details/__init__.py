@@ -8,30 +8,25 @@ import datetime
 import json
 import logging
 import os
+from os.path import getmtime, splitext
 
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-
-from product_details import settings_defaults
+from product_details.utils import memoize_for, settings_fallback
 
 
 class MissingJSONData(IOError):
     pass
 
 
-__version__ = '0.6'
+__version__ = '0.7'
 __all__ = ['__version__', 'product_details', 'version_compare']
 
 log = logging.getLogger('product_details')
 log.setLevel(logging.WARNING)
-
-
-def settings_fallback(key):
-    """Grab user-defined settings, or fall back to default."""
-    try:
-        return getattr(settings, key)
-    except (AttributeError, ImportError, ImproperlyConfigured):
-        return getattr(settings_defaults, key)
+DEFAULT_OPTIONS = {
+    'json_dir': settings_fallback('PROD_DETAILS_DIR'),
+    'auto_reload': settings_fallback('PROD_DETAILS_AUTO_RELOAD'),
+    'auto_reload_regions': settings_fallback('PROD_DETAILS_AUTO_RELOAD_REGIONS'),
+}
 
 
 class ProductDetails(object):
@@ -39,25 +34,87 @@ class ProductDetails(object):
     Main product details class. Implements the JSON files' content as
     attributes, e.g.: product_details.firefox_version_history .
     """
-    json_data = {}
 
-    def __init__(self):
-        """Load JSON files and keep them in memory."""
+    def __init__(self, **kwargs):
+        """Load JSON files and keep them in memory.
 
-        json_dir = settings_fallback('PROD_DETAILS_DIR')
+        :param json_dir: ``str`` The directory in which to store the downloaded
+                         JSON files.
+        :param auto_reload: ``bool`` Whether to detect changes to JSON files
+                            and reload them automatically.
+        :param auto_reload_regions: ``bool`` Whether to detect changes to
+                                    the region JSON files and reload
+                                    them automatically.
+        """
+        self.json_data = {}
+        self.json_mtime = {}
+        self.options = DEFAULT_OPTIONS.copy()
+        self.options.update(kwargs)
 
-        for filename in os.listdir(json_dir):
+        # set options as properties
+        for opt, val in self.options.items():
+            setattr(self, opt, val)
+
+        # pre-load product data
+        for filename in os.listdir(self.json_dir):
             if filename.endswith('.json'):
-                name = os.path.splitext(filename)[0]
-                path = os.path.join(json_dir, filename)
-                self.json_data[name] = json.load(open(path))
+                self._load_json_data(splitext(filename)[0])
+
+    def _load_json_data(self, name):
+        """Load data from a JSON file."""
+        path = self._get_json_abspath(name)
+        with codecs.open(path, encoding='utf8') as fd:
+            self.json_data[name] = json.load(fd)
+            if self.auto_reload:
+                self.json_mtime[name] = getmtime(path)
+
+    def _get_json_abspath(self, name):
+        """Return the full path to the JSON file for given name."""
+        return os.path.join(self.json_dir, '%s.json' % name)
+
+    @memoize_for(settings_fallback('PROD_DETAILS_AUTO_RELOAD_TTL'))
+    def _get_json_mtime(self, name):
+        path = self._get_json_abspath(name)
+        try:
+            mtime = getmtime(path)
+        except IOError:
+            mtime = None
+
+        return mtime
+
+    def _auto_reload_json_data(self, name):
+        mtime = self._get_json_mtime(name)
+        if mtime and mtime > self.json_mtime.get(name):
+            try:
+                self._load_json_data(name)
+            except IOError:
+                pass
+
+    def _get_json_data(self, name, auto_reload=False):
+        """Accessor for JSON data."""
+        if name in self.json_data:
+            if auto_reload:
+                self._auto_reload_json_data(name)
+
+            return self.json_data[name]
+
+        try:
+            self._load_json_data(name)
+        except IOError:
+            pass
+
+        try:
+            return self.json_data[name]
+        except KeyError:
+            raise MissingJSONData('Requested product details '
+                                  'file %s not found!' % name)
 
     def __getattr__(self, key):
         """Catch-all for access to JSON files."""
         try:
-            return self.json_data[key]
-        except KeyError:
-            log.warn('Requested product details file %s not found!' % key)
+            return self._get_json_data(key, self.auto_reload)
+        except MissingJSONData as e:
+            log.warn(e.message)
             return collections.defaultdict(lambda: None)
 
     @property
@@ -68,9 +125,9 @@ class ProductDetails(object):
         fmt = '%a, %d %b %Y %H:%M:%S %Z'
         dates = []
         for directory in (json_dir, os.path.join(json_dir, 'regions')):
-            file = os.path.join(directory, '.last_update')
+            lu_file = os.path.join(directory, '.last_update')
             try:
-                with open(file) as f:
+                with open(lu_file) as f:
                     d = f.read()
             except IOError:
                 d = ''
@@ -86,21 +143,17 @@ class ProductDetails(object):
         return dates[0]
 
     def get_regions(self, locale):
-        """Loads regions json file into memory, but only as needed."""
+        """Load regions json file into memory, but only as needed."""
         lookup = [locale, 'en-US']
         if '-' in locale:
             fallback, _, _ = locale.partition('-')
             lookup.insert(1, fallback)
         for l in lookup:
             key = 'regions/%s' % l
-            path = os.path.join(settings_fallback('PROD_DETAILS_DIR'),
-                                'regions', '%s.json' % l)
-            if self.json_data.get(key):
-                return self.json_data.get(key)
-            if os.path.exists(path):
-                with codecs.open(path, encoding='utf8') as fd:
-                    self.json_data[key] = json.load(fd)
-                    return self.json_data[key]
+            try:
+                return self._get_json_data(key, self.auto_reload_regions)
+            except MissingJSONData:
+                continue
 
         raise MissingJSONData('Unable to load region data for %s or en-US' %
                               locale)

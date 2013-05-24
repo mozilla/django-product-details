@@ -1,6 +1,19 @@
 import functools
 import time
 
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
+from product_details import settings_defaults
+
+
+def settings_fallback(key):
+    """Grab user-defined settings, or fall back to default."""
+    try:
+        return getattr(settings, key)
+    except (AttributeError, ImportError, ImproperlyConfigured):
+        return getattr(settings_defaults, key)
+
 
 def memoize_for(ttl=300):
     """Memoizing decorator that caches return values for `ttl` seconds.

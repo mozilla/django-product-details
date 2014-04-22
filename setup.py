@@ -1,7 +1,7 @@
 import codecs
 import os.path
 import re
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 def find_version(*file_paths):
@@ -23,7 +23,7 @@ setup(
     author_email='fwenzel@mozilla.com',
     url='http://github.com/fwenzel/django-mozilla-product-details',
     license='BSD',
-    packages=['product_details'],
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     install_requires=['Django>=1.1'],

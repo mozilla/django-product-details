@@ -46,7 +46,7 @@ Getting Started
 ### Installing
 Install this library using ``pip``:
 
-    pip install -e git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
+    pip install -e git://github.com/mozilla/django-mozilla-product-details#egg=django-mozilla-product-details
 
 ... or by downloading the ``product_details`` directory and dropping it into
 your django project.

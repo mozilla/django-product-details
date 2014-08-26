@@ -11,7 +11,8 @@ from urlparse import urljoin
 
 from django.core.management.base import NoArgsCommand, CommandError
 
-from product_details import settings_fallback
+from product_details import product_details
+from product_details.utils import settings_fallback
 
 
 log = logging.getLogger('prod_details')
@@ -112,7 +113,6 @@ class Command(NoArgsCommand):
             else:
                 raise CommandError('Could not retrieve file list: %s' % e)
 
-
         # Remember Last-Modified header.
         self.last_mod_response = resp.info()['Last-Modified']
 
@@ -176,5 +176,11 @@ class Command(NoArgsCommand):
             os.chmod(tf.name, 0644)
 
         shutil.move(tf.name, os.path.join(dest, json_file))
+
+        # clear cache for file
+        filename = json_file.rstrip('.json')
+        if src.endswith('regions/'):
+            filename = 'regions/' + filename
+        product_details.delete_cache(filename)
 
         return True

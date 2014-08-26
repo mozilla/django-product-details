@@ -68,6 +68,19 @@ defaults:
   by the user running the Django project. Defaults to:
   ``.../install_dir_of_this_app/product_details/json/``
 
+If you'd like to use Django's cache framework to store the data you may set the
+following settings. These will allow you to update and refresh the data without
+requiring a restart of the web server process.
+
+* ``PROD_DETAILS_CACHE_NAME`` defaults to an in memory cache that ignores timeouts.
+  This is the same behavior the library has always had. If you provide a name of a
+  cache configured in the Django configuration ``CACHES``, it will use that
+  cache to store the file data.
+* ``PROD_DETAILS_CACHE_TIMEOUT`` defaults to ``None`` which means no expiration. The
+  cache entries will expire by whatever other means the particular backend supports.
+  If set to an integer, it represents the number of seconds the cached data should be
+  kept per file.
+
 ### Updating the feed
 To update the data, execute this:
 
@@ -138,4 +151,7 @@ Development
 -----------
 Patches are welcome.
 
-To run tests, install ``nose`` and run ``nosetests`` from the project root.
+To run tests, install ``tox`` and run ``tox`` from the project root. This will run
+the tests in Python 2.6 and 2.7. If you don't have both of those available, install
+``nose`` and ``Mock`` and run the tests in your current Python version by 
+running ``nosetests``.

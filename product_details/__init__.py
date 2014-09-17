@@ -46,11 +46,12 @@ class ProductDetails(object):
 
         json_dir = settings_fallback('PROD_DETAILS_DIR')
 
-        for filename in os.listdir(json_dir):
-            if filename.endswith('.json'):
-                name = os.path.splitext(filename)[0]
-                path = os.path.join(json_dir, filename)
-                self.json_data[name] = json.load(open(path))
+        if os.path.exists(json_dir):
+            for filename in os.listdir(json_dir):
+                if filename.endswith('.json'):
+                    name = os.path.splitext(filename)[0]
+                    path = os.path.join(json_dir, filename)
+                    self.json_data[name] = json.load(open(path))
 
     def __getattr__(self, key):
         """Catch-all for access to JSON files."""

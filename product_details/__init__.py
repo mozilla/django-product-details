@@ -100,8 +100,17 @@ class ProductDetails(object):
                 return self.json_data.get(key)
             if os.path.exists(path):
                 with codecs.open(path, encoding='utf8') as fd:
-                    self.json_data[key] = json.load(fd)
-                    return self.json_data[key]
+                    regions = json.load(fd)
+
+                    # Decode double-escaped region names in some locales
+                    for key, value in regions.iteritems():
+                        try:
+                            regions[key] = value.decode('unicode-escape')
+                        except UnicodeEncodeError:
+                            pass
+
+                    self.json_data[key] = regions
+                    return regions
 
         raise MissingJSONData('Unable to load region data for %s or en-US' %
                               locale)

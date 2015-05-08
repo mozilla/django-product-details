@@ -19,7 +19,7 @@ class MissingJSONData(IOError):
     pass
 
 
-__version__ = '0.6'
+__version__ = '0.7'
 __all__ = ['__version__', 'product_details', 'version_compare']
 
 log = logging.getLogger('product_details')
@@ -39,10 +39,9 @@ class ProductDetails(object):
     Main product details class. Implements the JSON files' content as
     attributes, e.g.: product_details.firefox_version_history .
     """
-    json_data = {}
-
     def __init__(self):
         """Load JSON files and keep them in memory."""
+        self.json_data = {}
 
         json_dir = settings_fallback('PROD_DETAILS_DIR')
 

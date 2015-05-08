@@ -21,7 +21,7 @@ setup(
     long_description=open('README.md').read(),
     author='Fred Wenzel',
     author_email='fwenzel@mozilla.com',
-    url='http://github.com/fwenzel/django-mozilla-product-details',
+    url='https://github.com/mozilla/django-product-details/',
     license='BSD',
     packages=find_packages(),
     include_package_data=True,

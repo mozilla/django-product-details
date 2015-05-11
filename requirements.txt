@@ -1,2 +1,5 @@
 # Requirements for building tests
 nose
+
+# Requirements for releasing to pypi
+pypandoc

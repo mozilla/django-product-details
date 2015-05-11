@@ -3,6 +3,13 @@ import os.path
 import re
 from setuptools import find_packages, setup
 
+try:
+    from pypandoc import convert
+    read_md = lambda f: convert(f, 'rst')
+except ImportError:
+    print 'warning: pypandoc module not found, could not convert Markdown to RST'
+    read_md = lambda f: open(f, 'r').read()
+
 
 def find_version(*file_paths):
     version_file = codecs.open(os.path.join(os.path.dirname(__file__),
@@ -18,7 +25,7 @@ setup(
     name='django-mozilla-product-details',
     version=find_version('product_details', '__init__.py'),
     description='Product and locale details for Mozilla products.',
-    long_description=open('README.md').read(),
+    long_description=read_md('README.md'),
     author='Fred Wenzel',
     author_email='fwenzel@mozilla.com',
     url='https://github.com/mozilla/django-product-details/',

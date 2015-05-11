@@ -53,6 +53,8 @@ class ProductDetails(object):
                     self.json_data[name] = json.load(open(path))
 
     def __getattr__(self, key):
+        if key == 'languages':
+            self.json_data[key]['xx-testing'] = {'native': 'Testing'}
         """Catch-all for access to JSON files."""
         try:
             return self.json_data[key]

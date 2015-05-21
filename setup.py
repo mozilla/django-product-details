@@ -18,7 +18,7 @@ setup(
     name='django-mozilla-product-details',
     version=find_version('product_details', '__init__.py'),
     description='Product and locale details for Mozilla products.',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     author='Fred Wenzel',
     author_email='fwenzel@mozilla.com',
     url='https://github.com/mozilla/django-product-details/',

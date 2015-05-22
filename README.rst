@@ -182,3 +182,19 @@ current Python version by running ``nosetests``.
    :target: https://travis-ci.org/mozilla/django-product-details/
 .. |PyPI| image:: https://img.shields.io/pypi/v/django-mozilla-product-details.svg
    :target: https://pypi.python.org/pypi/django-mozilla-product-details
+
+Change Log
+----------
+
+0.7 - 2015-05-22
+~~~~~~~~~~~~~~~~
+
+-  Use the Django cache framework to store product data, allowing data to be
+   updated without a server restart.
+-  Add and update tests, setup tox for testing across Python and Django versions,
+   and setup Travis for CI.
+
+0.6 - 2015-05-08
+~~~~~~~~~~~~~~~~
+
+-  Initial PyPI release. Prior to this it was released and installed via github.

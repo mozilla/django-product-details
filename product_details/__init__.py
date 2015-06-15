@@ -1,9 +1,9 @@
 import codecs
-import collections
 import datetime
 import json
 import logging
 import os
+from collections import defaultdict
 
 from product_details.utils import get_django_cache, settings_fallback
 
@@ -12,13 +12,11 @@ class MissingJSONData(IOError):
     pass
 
 
-__version__ = '0.7'
+__version__ = '0.7.1'
 __all__ = ['__version__', 'product_details', 'version_compare']
 
 log = logging.getLogger('product_details')
 log.setLevel(settings_fallback('LOG_LEVEL'))
-
-NO_DATA = 'N'
 
 
 class ProductDetails(object):
@@ -48,6 +46,9 @@ class ProductDetails(object):
         except IOError:
             log.warn('Requested product details file %s not found!' % key)
             return None
+        except ValueError:
+            log.warn('Requested product details file %s is not JSON!' % key)
+            return None
 
         return data
 
@@ -57,17 +58,10 @@ class ProductDetails(object):
         data = self._cache.get(cache_key)
         if data is None:
             data = self._get_json_file_data(key)
-            if data is None:
-                data = NO_DATA
+            if data is not None:
+                self._cache.set(cache_key, data, self.cache_timeout)
 
-            self._cache.set(cache_key, data, self.cache_timeout)
-
-        if data == NO_DATA:
-            # must store and check for a constant because
-            # defaultdict instances are not pickleable.
-            return collections.defaultdict(lambda: None)
-
-        return data
+        return data or defaultdict(lambda: None)
 
     def delete_cache(self, key):
         """Clears the cache for a specific file.

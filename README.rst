@@ -186,6 +186,12 @@ current Python version by running ``nosetests``.
 Change Log
 ----------
 
+0.7.1 - 2015-06-15
+~~~~~~~~~~~~~~~~~~
+
+-  Do not cache a file miss.
+-  Catch an attempt to parse a non-JSON or corrupt file.
+
 0.7 - 2015-05-22
 ~~~~~~~~~~~~~~~~
 

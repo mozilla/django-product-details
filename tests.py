@@ -151,18 +151,28 @@ def test_cache_delete():
     eq_(pd._get_json_file_data.call_count, 2)
 
 
-def test_cache_missing_files():
-    """The fact that a file doesn't exist should be cached as well."""
+@patch('codecs.open')
+def test_no_cache_missing_files(open_mock):
+    """The fact that a file doesn't exist should not be cached."""
+    open_mock.side_effect = IOError
     pd = product_details.ProductDetails()
     pd.clear_cache()
-    pd._get_json_file_data = Mock(return_value=None)
     ok_(isinstance(pd.the_dude, defaultdict))
     ok_(isinstance(pd.the_dude, defaultdict))
-    pd.delete_cache('the_dude')
+    eq_(open_mock.call_count, 2)
+
+
+@patch('codecs.open')
+@patch('json.load')
+def test_no_cache_corrupt_files(load_mock, open_mock):
+    """The fact that a file doesn't parse correctly should not be cached."""
+    load_mock.side_effect = ValueError
+    pd = product_details.ProductDetails()
+    pd.clear_cache()
     ok_(isinstance(pd.the_dude, defaultdict))
     ok_(isinstance(pd.the_dude, defaultdict))
-    pd._get_json_file_data.assert_called_with('the_dude')
-    eq_(pd._get_json_file_data.call_count, 2)
+    load_mock.assert_called_with(open_mock.return_value.__enter__.return_value)
+    eq_(load_mock.call_count, 2)
 
 
 def test_init():

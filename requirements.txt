@@ -1,2 +1,2 @@
 # Requirements for building tests
-tox==1.9.2
+tox==2.1.1

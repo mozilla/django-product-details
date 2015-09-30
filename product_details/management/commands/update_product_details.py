@@ -10,6 +10,7 @@ import urllib2
 from urlparse import urljoin
 
 from django.core.management.base import NoArgsCommand, CommandError
+from django.utils.module_loading import import_string
 
 from product_details import product_details
 from product_details.utils import settings_fallback
@@ -18,6 +19,7 @@ from product_details.utils import settings_fallback
 log = logging.getLogger('prod_details')
 log.addHandler(logging.StreamHandler())
 log.setLevel(settings_fallback('LOG_LEVEL'))
+STORAGE_CLASS = import_string(settings_fallback('PROD_DETAILS_STORAGE'))
 
 
 class Command(NoArgsCommand):
@@ -37,6 +39,7 @@ class Command(NoArgsCommand):
         # some settings
         self.PROD_DETAILS_DIR = settings_fallback('PROD_DETAILS_DIR')
         self.PROD_DETAILS_URL = settings_fallback('PROD_DETAILS_URL')
+        self._storage = STORAGE_CLASS(json_dir=self.PROD_DETAILS_DIR)
 
         super(Command, self).__init__(*args, **kwargs)
 
@@ -51,26 +54,24 @@ class Command(NoArgsCommand):
         if self.options['force']:
             log.info('Product details update forced.')
 
-        self.download_directory(self.PROD_DETAILS_URL, self.PROD_DETAILS_DIR)
-        self.download_directory(urljoin(self.PROD_DETAILS_URL, 'regions/'),
-                                os.path.join(self.PROD_DETAILS_DIR, 'regions/'))
+        self.download_directory()
+        self.download_directory('regions/')
 
         log.debug('Product Details update run complete.')
 
-    def download_directory(self, src, dest):
+    def download_directory(self, dir=''):
         # Grab list of JSON files from server.
+        src = urljoin(self.PROD_DETAILS_URL, dir)
         log.debug('Grabbing list of JSON files from the server from %s' % src)
-        if not os.path.exists(dest):
-            os.makedirs(dest)
 
-        json_files = self.get_file_list(src, dest)
+        json_files = self.get_file_list(dir)
         if not json_files:
             return
 
         # Grab all modified JSON files from server and replace them locally.
         had_errors = False
         for json_file in json_files:
-            if not self.download_json_file(src, dest, json_file):
+            if not self.download_json_file(urljoin(dir, json_file)):
                 had_errors = True
 
         if had_errors:
@@ -80,27 +81,26 @@ class Command(NoArgsCommand):
             # Save Last-Modified timestamp to detect updates against next time.
             log.debug('Writing last-updated timestamp (%s).' % (
                 self.last_mod_response))
-            with open(os.path.join(dest, '.last_update'),
-                      'w') as timestamp_file:
-                timestamp_file.write(self.last_mod_response)
+            self._storage.update(dir or '/', '', self.last_mod_response)
 
-    def get_file_list(self, src, dest):
+    def get_file_list(self, dir):
         """
         Get list of files to be updated from the server.
 
         If no files have been modified, returns an empty list.
         """
         # If not forced: Read last updated timestamp
+        src = urljoin(self.PROD_DETAILS_URL, dir)
         self.last_update_local = None
         headers = {}
 
         if not self.options['force']:
-            try:
-                self.last_update_local = open(os.path.join(dest, '.last_update')).read()
+            self.last_update_local = self._storage.last_modified(dir or '/')
+            if self.last_update_local:
                 headers = {'If-Modified-Since': self.last_update_local}
                 log.debug('Found last update timestamp: %s' % (
                     self.last_update_local))
-            except (IOError, ValueError):
+            else:
                 log.info('No last update timestamp found.')
 
         # Retrieve file list if modified since last update
@@ -108,7 +108,8 @@ class Command(NoArgsCommand):
             resp = urllib2.urlopen(urllib2.Request(src, headers=headers))
         except urllib2.URLError, e:
             if e.code == httplib.NOT_MODIFIED:
-                log.info('Product Details were up to date.')
+                log.info('{} were up to date.'.format(
+                    'Regions' if dir == 'regions/' else 'Product Details'))
                 return []
             else:
                 raise CommandError('Could not retrieve file list: %s' % e)
@@ -119,7 +120,7 @@ class Command(NoArgsCommand):
         json_files = set(re.findall(r'href="([^"]+.json)"', resp.read()))
         return json_files
 
-    def download_json_file(self, src, dest, json_file):
+    def download_json_file(self, json_file):
         """
         Downloads a JSON file off the server, checks its validity, then drops
         it into the target dir.
@@ -129,14 +130,14 @@ class Command(NoArgsCommand):
         log.info('Updating %s from server' % json_file)
 
         if not self.options['force']:
-            headers = {'If-Modified-Since': self.last_update_local}
+            headers = {'If-Modified-Since': self._storage.last_modified(json_file)}
         else:
             headers = {}
 
         # Grab JSON data if modified
         try:
             resp = urllib2.urlopen(urllib2.Request(
-                urljoin(src, json_file), headers=headers))
+                urljoin(self.PROD_DETAILS_URL, json_file), headers=headers))
         except urllib2.URLError, e:
             if e.code == httplib.NOT_MODIFIED:
                 log.debug('%s was not modified.' % json_file)
@@ -155,32 +156,13 @@ class Command(NoArgsCommand):
 
         # Try parsing the file, import if it's valid JSON.
         try:
-            parsed = json.loads(json_data)
+            json.loads(json_data)
         except ValueError:
-            log.warn('Could not parse JSON data from %s. Skipping.' % (
-                json_file))
+            log.warn('Could not parse JSON data from %s. Skipping.' % json_file)
             return False
 
         # Write JSON data to HD.
-        log.debug('Writing new copy of %s to %s.' % (
-            json_file, dest))
-        tf = tempfile.NamedTemporaryFile(delete=False)
-        tf.write(urllib2.urlopen(
-            urljoin(src, json_file)).read())
-        tf.close()
-
-        # lchmod is available on BSD-based Unixes only.
-        if hasattr(os, 'lchmod'):
-            os.lchmod(tf.name, 0644)
-        else:
-            os.chmod(tf.name, 0644)
-
-        shutil.move(tf.name, os.path.join(dest, json_file))
-
-        # clear cache for file
-        filename = json_file.rstrip('.json')
-        if src.endswith('regions/'):
-            filename = 'regions/' + filename
-        product_details.delete_cache(filename)
+        log.debug('Writing new copy of %s.' % json_file)
+        self._storage.update(json_file, json_data, resp.info()['Last-Modified'])
 
         return True

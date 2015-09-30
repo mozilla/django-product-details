@@ -17,3 +17,6 @@ PROD_DETAILS_CACHE_NAME = 'default'  # django default
 
 # how long to cache
 PROD_DETAILS_CACHE_TIMEOUT = 60 * 60 * 12  # 12 hours
+
+# data storage class
+PROD_DETAILS_STORAGE = 'product_details.storage.PDFileStorage'

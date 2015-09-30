@@ -5,6 +5,8 @@ import logging
 import os
 from collections import defaultdict
 
+from django.utils.module_loading import import_string
+
 from product_details.utils import get_django_cache, settings_fallback
 
 
@@ -26,41 +28,14 @@ class ProductDetails(object):
     """
     _cache_key = 'prod-details:{0}'
 
-    def __init__(self, json_dir=None, cache_name=None, cache_timeout=None):
-        self.json_dir = json_dir or settings_fallback('PROD_DETAILS_DIR')
-        self.cache_timeout = cache_timeout or settings_fallback('PROD_DETAILS_CACHE_TIMEOUT')
-        cache_name = cache_name or settings_fallback('PROD_DETAILS_CACHE_NAME')
-        self._cache = get_django_cache(cache_name)
+    def __init__(self, json_dir=None, cache_name=None, cache_timeout=None,
+                 storage_class=None):
+        storage_class = import_string(storage_class or settings_fallback('PROD_DETAILS_STORAGE'))
+        self._storage = storage_class(cache_name=cache_name, cache_timeout=cache_timeout,
+                                      json_dir=json_dir)
 
     def __getattr__(self, key):
-        return self._get_json_data(key)
-
-    def _get_cache_key(self, key):
-        return self._cache_key.format(key)
-
-    def _get_json_file_data(self, key):
-        filename = os.path.join(self.json_dir, key + '.json')
-        try:
-            with codecs.open(filename, encoding='utf8') as json_file:
-                data = json.load(json_file)
-        except IOError:
-            log.warn('Requested product details file %s not found!' % key)
-            return None
-        except ValueError:
-            log.warn('Requested product details file %s is not JSON!' % key)
-            return None
-
-        return data
-
-    def _get_json_data(self, key):
-        """Catch-all for access to JSON files."""
-        cache_key = self._get_cache_key(key)
-        data = self._cache.get(cache_key)
-        if data is None:
-            data = self._get_json_file_data(key)
-            if data is not None:
-                self._cache.set(cache_key, data, self.cache_timeout)
-
+        data = self._storage.data('{0}.json'.format(key))
         return data or defaultdict(lambda: None)
 
     def delete_cache(self, key):
@@ -68,38 +43,19 @@ class ProductDetails(object):
 
         :param key: str file name with '.json' stripped off.
         """
-        self._cache.delete(self._get_cache_key(key))
+        self._storage.delete_cache(self._get_cache_key(key))
 
     def clear_cache(self):
         """Clears the entire cache.
 
         WARNING: Only use this if you have a separate cache for product-details.
         """
-        self._cache.clear()
+        self._storage.clear_cache()
 
     @property
     def last_update(self):
         """Return the last-updated date, if it exists."""
-
-        fmt = '%a, %d %b %Y %H:%M:%S %Z'
-        dates = []
-        for directory in (self.json_dir, os.path.join(self.json_dir, 'regions')):
-            file = os.path.join(directory, '.last_update')
-            try:
-                with open(file) as f:
-                    d = f.read()
-            except IOError:
-                d = ''
-
-            try:
-                dates.append(datetime.datetime.strptime(d, fmt))
-            except ValueError:
-                dates.append(None)
-
-        if None in dates:
-            return None
-        # For backwards compat., just return the date of the parent.
-        return dates[0]
+        return self._storage.last_updated('/')
 
     def get_regions(self, locale):
         """Loads regions json file into memory, but only as needed."""
@@ -108,8 +64,8 @@ class ProductDetails(object):
             fallback, _, _ = locale.partition('-')
             lookup.insert(1, fallback)
         for l in lookup:
-            key = 'regions/%s' % l
-            data = self._get_json_data(key)
+            key = 'regions/%s.json' % l
+            data = self._storage.data(key)
             if data:
                 return data
 

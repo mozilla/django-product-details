@@ -74,6 +74,21 @@ defaults:
    needs to be writable by the user that'll execute the management
    command, and readable by the user running the Django project.
    Defaults to: ``.../install_dir_of_this_app/product_details/json/``
+   (only for use with ``DBFileStorage`` backend (see below)).
+
+You can further decide where the JSON data should be stored by using
+a storage backend class. There are 2 provided in the app currently, but
+it should be easy to create a subclass of
+``product_details.storage.ProductDetailsStorage`` and store them wherever
+you like. The two provided are for the filesystem (the default) and
+the database. To configure which backend it uses set the following:
+
+-  ``PROD_DETAILS_STORAGE`` a string of the dotted path to a storage
+   class (like in MIDDLEWARE_CLASSES). Available classes included with
+   the app are ``product_details.storage.PDFileStorage`` (default) and
+   ``product_details.storage.PDDatabaseStorage``. To use the database
+   storage class you should run migrations (./manage.py migrate) which
+   will create the database table required to store the data.
 
 This app uses Django's cache framework to store the product data so that
 the data can be updated on the site without requiring a server restart.
@@ -185,6 +200,12 @@ current Python version by running ``nosetests``.
 
 Change Log
 ----------
+
+0.8 - 2015-09-30
+~~~~~~~~~~~~~~~~
+
+- Add configurable json data file storage backends.
+- Add filesystem and database backends.
 
 0.7.1 - 2015-06-15
 ~~~~~~~~~~~~~~~~~~

@@ -5,5 +5,7 @@ env:
     - TOXENV=py27-1.7
     - TOXENV=py27-1.8
 install:
-  - travis_retry pip install tox
-script: tox
+  - travis_retry pip install tox flake8
+script:
+  - flake8 product_details
+  - tox

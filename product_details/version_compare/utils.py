@@ -7,6 +7,7 @@ def uniquifier(seq, key=None):
     """
     if key is None:
         key = lambda x: x
+
     def finder(seq):
         seen = {}
         for item in seq:
@@ -14,4 +15,5 @@ def uniquifier(seq, key=None):
             if marker not in seen:
                 seen[marker] = True
                 yield item
+
     return list(finder(seq))

@@ -2,10 +2,8 @@ import codecs
 import json
 import logging
 import os
-from os.path import exists, join, split
+import os.path
 import tempfile
-import urllib2
-from urlparse import urljoin
 import shutil
 
 from product_details.models import ProductDetailsFile
@@ -124,14 +122,14 @@ class PDFileStorage(ProductDetailsStorage):
         elif name.endswith('/'):
             fn = name + self.last_modified_dir_file_name
         else:
-            path, fn = split(name)
+            path, fn = os.path.split(name)
             fn = '.{0}.last_modified'.format(fn)
             fn = os.path.join(path, fn)
         return os.path.join(self.json_dir, fn)
 
     def last_modified(self, name):
         lm_fn = self.last_modified_file_name(name)
-        if not exists(lm_fn):
+        if not os.path.exists(lm_fn):
             lm_fn = self.last_modified_dir_file_name
 
         try:

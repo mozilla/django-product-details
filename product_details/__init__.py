@@ -1,13 +1,9 @@
-import codecs
-import datetime
-import json
 import logging
-import os
 from collections import defaultdict
 
 from django.utils.module_loading import import_string
 
-from product_details.utils import get_django_cache, settings_fallback
+from product_details.utils import settings_fallback
 
 
 class MissingJSONData(IOError):

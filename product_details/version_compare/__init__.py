@@ -145,8 +145,9 @@ def version_int(version):
     d['pre'] = 0 if version_data['pre'] else 1
 
     v = "%d%02d%02d%02d%d%02d%d%02d" % (d['major'], d['minor1'],
-            d['minor2'], d['minor3'], d['alpha'], d['alpha_ver'], d['pre'],
-            d['pre_ver'])
+                                        d['minor2'], d['minor3'], d['alpha'], d['alpha_ver'],
+                                        d['pre'],
+                                        d['pre_ver'])
     return int(v)
 
 

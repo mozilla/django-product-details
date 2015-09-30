@@ -2,17 +2,13 @@ import httplib
 import json
 import logging
 from optparse import make_option
-import os
 import re
-import shutil
-import tempfile
 import urllib2
 from urlparse import urljoin
 
 from django.core.management.base import NoArgsCommand, CommandError
 from django.utils.module_loading import import_string
 
-from product_details import product_details
 from product_details.utils import settings_fallback
 
 

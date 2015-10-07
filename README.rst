@@ -62,7 +62,7 @@ management commands.
 Configuration
 ~~~~~~~~~~~~~
 
-No configuration should be necessary. However, you can add and alter the
+No configuration should be necessary. However, you can add the
 following settings to your ``settings.py`` file if you disagree with the
 defaults:
 
@@ -88,7 +88,10 @@ the database. To configure which backend it uses set the following:
    the app are ``product_details.storage.PDFileStorage`` (default) and
    ``product_details.storage.PDDatabaseStorage``. To use the database
    storage class you should run migrations (./manage.py migrate) which
-   will create the database table required to store the data.
+   will create the database table required to store the data and populate
+   the table with the JSON data included with the library (or the data
+   in the configured data directory). You can then keep the data updated
+   via the ``update_product_details`` management command just like normal.
 
 This app uses Django's cache framework to store the product data so that
 the data can be updated on the site without requiring a server restart.
@@ -191,12 +194,18 @@ Patches are welcome.
 To run tests, install ``tox`` and run ``tox`` from the project root.
 This will run the tests in Python 2.6 and 2.7. If you don't have both of
 those available, install ``nose`` and ``Mock`` and run the tests in your
-current Python version by running ``nosetests``.
+current Python version by running ``./runtests.py``.
 
 .. |Travis| image:: https://img.shields.io/travis/mozilla/django-product-details.svg
    :target: https://travis-ci.org/mozilla/django-product-details/
 .. |PyPI| image:: https://img.shields.io/pypi/v/django-mozilla-product-details.svg
    :target: https://pypi.python.org/pypi/django-mozilla-product-details
+
+Releasing
+---------
+
+If you are logged into PyPI as an owner of this package, then just run ``./release.sh``.
+It will run the tests, update the JSON data, and build and upload the package to PyPI.
 
 Change Log
 ----------

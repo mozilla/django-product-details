@@ -5,7 +5,6 @@ implementation.
 import json
 from collections import defaultdict
 from tempfile import mkdtemp
-from django.test import override_settings
 
 from mock import Mock, patch, call
 from nose.tools import eq_, ok_

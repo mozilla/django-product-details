@@ -7,5 +7,5 @@ env:
 install:
   - travis_retry pip install tox flake8
 script:
-  - flake8 product_details
+  - flake8 product_details tests
   - tox

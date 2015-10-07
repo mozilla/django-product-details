@@ -107,6 +107,22 @@ class PDFileStorageTests(PDStorageClassMixin, TestCase):
         ok_(self.storage.last_modified_file_name('regions/de.json').endswith(
             'regions/.de.json.last_modified'))
 
+    @patch('os.path.exists')
+    @patch('product_details.storage.open', create=True)
+    def test_last_modified_falls_back(self, open_mock, exists_mock):
+        exists_mock.return_value = False
+        open_mock.side_effect = IOError
+        with patch.object(self.storage, 'last_modified_file_name') as lmfn_mock:
+            self.storage.last_modified('uli.json')
+            self.storage.last_modified('publishers/treehorn.json')
+
+        lmfn_mock.assert_has_calls([
+            call('uli.json'),
+            call('/'),
+            call('publishers/treehorn.json'),
+            call('publishers/'),
+        ])
+
     def test_all_json_files(self):
         sto = storage.PDFileStorage(json_dir='/path/to/json/files')
         walk_results = [
@@ -164,7 +180,7 @@ class ProductDetailsTests(TestCase):
 class LoadJSONFileDataTests(TestCase):
     def test_db_has_data(self):
         model = Mock()
-        model.objects.count.return_value = 1
+        model.objects.exists.return_value = True
         storage.json_file_data_to_db(model)
         self.assertFalse(model.objects.create.called)
 
@@ -172,7 +188,7 @@ class LoadJSONFileDataTests(TestCase):
     def test_attempts_load_from_default_if_bad_dir(self, file_storage_mock):
         """Should try to load JSON from default dir if the dir in settings does not exist."""
         model = Mock()
-        model.objects.count.return_value = 0
+        model.objects.exists.return_value = False
         file_storage_mock.return_value.all_json_files.return_value = []
         file_storage_mock.return_value.json_dir = '/does/not/exist'
         storage.json_file_data_to_db(model)
@@ -184,7 +200,7 @@ class LoadJSONFileDataTests(TestCase):
     def test_loads_from_default_if_bad_dir(self, file_storage_mock):
         """Should try to load JSON from default dir if the dir in settings does not exist."""
         model = Mock()
-        model.objects.count.return_value = 0
+        model.objects.exists.return_value = False
         storage_mock = file_storage_mock.return_value
         storage_mock.all_json_files.side_effect = [
             [],
@@ -194,7 +210,7 @@ class LoadJSONFileDataTests(TestCase):
         storage.json_file_data_to_db(model)
         file_storage_mock.assert_called_with(json_dir=settings_defaults.PROD_DETAILS_DIR)
         eq_(file_storage_mock.call_count, 2)
-        model.objects.create.assert_has_calls([
+        model.assert_has_calls([
             call(name='dude.json', content=storage_mock.content.return_value,
                  last_modified=storage_mock.last_modified.return_value),
             call(name='bunny.json', content=storage_mock.content.return_value,
@@ -209,12 +225,12 @@ class LoadJSONFileDataTests(TestCase):
     def test_loads_from_settings_dir(self, file_storage_mock):
         """Should try to load JSON from default dir if the dir in settings does not exist."""
         model = Mock()
-        model.objects.count.return_value = 0
+        model.objects.exists.return_value = False
         storage_mock = file_storage_mock.return_value
         storage_mock.all_json_files.return_value = ['walter.json', 'donnie.json']
         storage.json_file_data_to_db(model)
         file_storage_mock.assert_called_once_with()
-        model.objects.create.assert_has_calls([
+        model.assert_has_calls([
             call(name='walter.json', content=storage_mock.content.return_value,
                  last_modified=storage_mock.last_modified.return_value),
             call(name='donnie.json', content=storage_mock.content.return_value,

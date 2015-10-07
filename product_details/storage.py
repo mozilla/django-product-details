@@ -130,7 +130,7 @@ class PDFileStorage(ProductDetailsStorage):
     def last_modified(self, name):
         lm_fn = self.last_modified_file_name(name)
         if not os.path.exists(lm_fn):
-            lm_fn = self.last_modified_dir_file_name
+            lm_fn = self.last_modified_file_name(os.path.dirname(name) + '/')
 
         try:
             with open(lm_fn) as lm_fo:
@@ -199,7 +199,7 @@ def json_file_data_to_db(model=None):
     It's here mostly so that it can be imported and tested.
     """
     PDModel = model or ProductDetailsFile
-    if PDModel.objects.count():
+    if PDModel.objects.exists():
         # nothing to do if there's already data
         return
 
@@ -219,12 +219,9 @@ def json_file_data_to_db(model=None):
     if not files:
         return
 
-    for filename in files:
-        PDModel.objects.create(
-            name=filename,
-            content=storage.content(filename),
-            last_modified=storage.last_modified(filename),
-        )
+    pd_objects = [PDModel(name=fn, content=storage.content(fn),
+                          last_modified=storage.last_modified(fn)) for fn in files]
+    pd_objects.append(PDModel(name='/', last_modified=storage.last_modified('/')))
+    pd_objects.append(PDModel(name='regions/', last_modified=storage.last_modified('regions/')))
 
-    PDModel.objects.create(name='/', last_modified=storage.last_modified('/'))
-    PDModel.objects.create(name='regions/', last_modified=storage.last_modified('regions/'))
+    PDModel.objects.bulk_create(pd_objects)

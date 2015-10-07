@@ -210,6 +210,12 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.8.1 - 2015-10-07
+~~~~~~~~~~~~~~~~~~
+
+- Add a data migration that will import the included JSON file data into the database
+  table upon creation.
+
 0.8 - 2015-09-30
 ~~~~~~~~~~~~~~~~
 

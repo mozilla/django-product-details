@@ -6,9 +6,9 @@ import os.path
 import tempfile
 import shutil
 
+from product_details import settings_defaults
 from product_details.models import ProductDetailsFile
 from product_details.utils import get_django_cache, settings_fallback
-
 
 log = logging.getLogger('product_details')
 
@@ -181,3 +181,50 @@ class PDFileStorage(ProductDetailsStorage):
 
         with open(lm_fn, 'w') as lm_fo:
             lm_fo.write(last_modified)
+
+    def all_json_files(self):
+        json_files = []
+        for root, dirs, files in os.walk(self.json_dir):
+            root = os.path.relpath(root, self.json_dir)
+            root = '' if root == '.' else root
+            json_files.extend(os.path.join(root, f) for f in files if f.endswith('.json'))
+
+        return json_files
+
+
+def json_file_data_to_db(model=None):
+    """Import JSON file data into the DB.
+
+    This is a function to be used in a data migration.
+    It's here mostly so that it can be imported and tested.
+    """
+    PDModel = model or ProductDetailsFile
+    if PDModel.objects.count():
+        # nothing to do if there's already data
+        return
+
+    default_path = settings_defaults.PROD_DETAILS_DIR
+
+    storage = PDFileStorage()
+    files = storage.all_json_files()
+
+    if not files:
+        if storage.json_dir == default_path:
+            # no files to load
+            return
+
+        storage = PDFileStorage(json_dir=default_path)
+        files = storage.all_json_files()
+
+    if not files:
+        return
+
+    for filename in files:
+        PDModel.objects.create(
+            name=filename,
+            content=storage.content(filename),
+            last_modified=storage.last_modified(filename),
+        )
+
+    PDModel.objects.create(name='/', last_modified=storage.last_modified('/'))
+    PDModel.objects.create(name='regions/', last_modified=storage.last_modified('regions/'))

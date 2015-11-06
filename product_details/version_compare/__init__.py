@@ -1,5 +1,6 @@
 """Version comparison module for Mozilla-style application versions."""
 import re
+from functools import total_ordering
 
 from product_details.version_compare.decorators import memoize
 from product_details.version_compare.utils import uniquifier
@@ -18,6 +19,7 @@ _version_re = re.compile(
     re.VERBOSE)
 
 
+@total_ordering
 class Version(object):
     """An object representing a version."""
     _version = None
@@ -38,16 +40,17 @@ class Version(object):
             for key, val in self._version_dict.items():
                 setattr(self, key, val)
 
-        except AssertionError, e:
+        except AssertionError as e:
             raise ValueError('Error parsing version: %s' % e)
 
     def __str__(self):
         return str(self._version)
 
-    def __cmp__(self, other):
-        """Compare two versions."""
-        assert isinstance(other, Version)
-        return cmp(self._version_int, other._version_int)
+    def __eq__(self, other):
+        return self._version_int == other._version_int
+
+    def __lt__(self, other):
+        return self._version_int < other._version_int
 
     @property
     def is_beta(self):
@@ -178,8 +181,8 @@ def simplify_version(version):
             suffixes.append(v['pre_ver'])
 
     # stringify
-    pieces = map(str, pieces)
-    suffixes = map(str, suffixes)
+    pieces = [str(x) for x in pieces]
+    suffixes = [str(x) for x in suffixes]
 
     # build version number
     return '.'.join(pieces) + ''.join(suffixes)

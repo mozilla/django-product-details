@@ -1,11 +1,12 @@
-import httplib
 import json
 import logging
-from optparse import make_option
 import re
-import urllib2
-from urlparse import urljoin
+from optparse import make_option
 
+from django.utils.six.moves import http_client as httplib
+from django.utils.six.moves.urllib import request
+from django.utils.six.moves.urllib.error import URLError
+from django.utils.six.moves.urllib.parse import urljoin
 from django.core.management.base import NoArgsCommand, CommandError
 from django.utils.module_loading import import_string
 
@@ -101,8 +102,8 @@ class Command(NoArgsCommand):
 
         # Retrieve file list if modified since last update
         try:
-            resp = urllib2.urlopen(urllib2.Request(src, headers=headers))
-        except urllib2.URLError, e:
+            resp = request.urlopen(request.Request(src, headers=headers))
+        except URLError as e:
             if e.code == httplib.NOT_MODIFIED:
                 log.info('{} were up to date.'.format(
                     'Regions' if dir == 'regions/' else 'Product Details'))
@@ -132,9 +133,9 @@ class Command(NoArgsCommand):
 
         # Grab JSON data if modified
         try:
-            resp = urllib2.urlopen(urllib2.Request(
+            resp = request.urlopen(request.Request(
                 urljoin(self.PROD_DETAILS_URL, json_file), headers=headers))
-        except urllib2.URLError, e:
+        except URLError as e:
             if e.code == httplib.NOT_MODIFIED:
                 log.debug('%s was not modified.' % json_file)
                 return True

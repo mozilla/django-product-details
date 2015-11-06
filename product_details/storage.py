@@ -7,9 +7,11 @@ import tempfile
 import shutil
 from datetime import datetime
 
+from django.utils.six import text_type
 from product_details import settings_defaults
 from product_details.models import ProductDetailsFile
 from product_details.utils import get_django_cache, settings_fallback
+
 
 log = logging.getLogger('product_details')
 
@@ -101,7 +103,7 @@ class PDDatabaseStorage(ProductDetailsStorage):
     def content(self, name):
         fo = self.file_object(name)
         if fo:
-            return fo.content.encode('utf-8')
+            return text_type(fo.content)
 
         return None
 
@@ -150,8 +152,8 @@ class PDFileStorage(ProductDetailsStorage):
     def content(self, name):
         filename = os.path.join(self.json_dir, name)
         try:
-            with codecs.open(filename, encoding='utf8') as json_file:
-                return json_file.read()
+            with codecs.open(filename, 'rb', encoding='utf8') as json_file:
+                return text_type(json_file.read())
         except IOError:
             log.warn('Requested product details file %s not found!' % name)
         except ValueError:
@@ -173,14 +175,14 @@ class PDFileStorage(ProductDetailsStorage):
             log.debug('Writing new copy of %s to %s.' % (
                 name, self.json_dir))
             tf = tempfile.NamedTemporaryFile(delete=False)
-            tf.write(content)
+            tf.write(content.encode('utf8'))
             tf.close()
 
             # lchmod is available on BSD-based Unixes only.
             if hasattr(os, 'lchmod'):
-                os.lchmod(tf.name, 0644)
+                os.lchmod(tf.name, 0o644)
             else:
-                os.chmod(tf.name, 0644)
+                os.chmod(tf.name, 0o644)
 
             shutil.move(tf.name, filename)
             lm_fn = self.last_modified_file_name(name)

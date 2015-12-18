@@ -6,6 +6,7 @@ import json
 from collections import defaultdict
 from tempfile import mkdtemp
 
+from datetime import datetime
 from mock import Mock, patch, call
 from nose.tools import eq_, ok_
 from django.test.testcases import TestCase
@@ -77,6 +78,17 @@ class PDStorageClassMixin(object):
         self.storage.update('dude.json', 'bowling', 'just now')
         eq_(self.storage.content('dude.json'), 'bowling')
         eq_(self.storage.last_modified('dude.json'), 'just now')
+
+    def test_last_modified_datetime(self):
+        self.storage.update('dude.json', 'abide', 'Sat, 10 Oct 2015 10:26:20 GMT')
+        eq_(self.storage.last_modified_datetime('dude.json'), datetime(2015, 10, 10, 10, 26, 20))
+
+        self.storage.update('dude.json', 'abide', 'nihilists')
+        ok_(self.storage.last_modified_datetime('dude.json') is None)
+
+        with patch.object(self.storage, 'last_modified') as lm_mock:
+            lm_mock.return_value = None
+            ok_(self.storage.last_modified_datetime('dude.json') is None)
 
     def test_store_dir_dates(self):
         self.storage.update('/', '', 'just now')
@@ -167,7 +179,7 @@ class ProductDetailsTests(TestCase):
         self.pd._storage.data.assert_called_with('the_dude.json')
 
     def test_last_update(self):
-        self.pd._storage.last_updated.return_value = 'never'
+        self.pd._storage.last_modified_datetime.return_value = 'never'
         eq_(self.pd.last_update, 'never')
 
     def test_no_file_response(self):

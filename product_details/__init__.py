@@ -51,7 +51,7 @@ class ProductDetails(object):
     @property
     def last_update(self):
         """Return the last-updated date, if it exists."""
-        return self._storage.last_updated('/')
+        return self._storage.last_modified_datetime('/')
 
     def get_regions(self, locale):
         """Loads regions json file into memory, but only as needed."""

@@ -5,6 +5,7 @@ import os
 import os.path
 import tempfile
 import shutil
+from datetime import datetime
 
 from product_details import settings_defaults
 from product_details.models import ProductDetailsFile
@@ -43,6 +44,14 @@ class ProductDetailsStorage(object):
         Return the last-modified value for the requested file name.
         """
         raise NotImplementedError()
+
+    def last_modified_datetime(self, name):
+        fmt = '%a, %d %b %Y %H:%M:%S %Z'
+        try:
+            return datetime.strptime(self.last_modified(name), fmt)
+        except (ValueError, TypeError):
+            # bad date string format or None
+            return None
 
     def content(self, name):
         """

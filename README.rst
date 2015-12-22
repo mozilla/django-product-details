@@ -210,6 +210,12 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.8.2 - 2015-12-22
+~~~~~~~~~~~~~~~~~~
+
+- Use HTTPS by default to fetch JSON data. Thanks jvehent!
+- Fix product_details.last_update property. It's been broken since 0.8. Thanks for the report diox!
+
 0.8.1 - 2015-10-07
 ~~~~~~~~~~~~~~~~~~
 

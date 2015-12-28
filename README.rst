@@ -210,6 +210,12 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.9 - 2015-12-28
+~~~~~~~~~~~~~~~~
+
+- Support for Python 3 and 2 simultaneously! Also provide a universal wheel package.
+- Support for Django 1.9. Thanks Osmose!
+
 0.8.2 - 2015-12-22
 ~~~~~~~~~~~~~~~~~~
 

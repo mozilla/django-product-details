@@ -9,7 +9,6 @@ from datetime import datetime
 
 from django.utils.six import text_type
 from product_details import settings_defaults
-from product_details.models import ProductDetailsFile
 from product_details.utils import get_django_cache, settings_fallback
 
 
@@ -88,6 +87,8 @@ class ProductDetailsStorage(object):
 class PDDatabaseStorage(ProductDetailsStorage):
     @staticmethod
     def file_object(name):
+        from product_details.models import ProductDetailsFile
+
         try:
             return ProductDetailsFile.objects.get(name=name)
         except ProductDetailsFile.DoesNotExist:
@@ -108,6 +109,8 @@ class PDDatabaseStorage(ProductDetailsStorage):
         return None
 
     def update(self, name, content, last_modified):
+        from product_details.models import ProductDetailsFile
+
         fo = self.file_object(name)
         if not fo:
             fo = ProductDetailsFile(name=name, content=content,
@@ -203,12 +206,14 @@ class PDFileStorage(ProductDetailsStorage):
         return json_files
 
 
-def json_file_data_to_db(model=None):
+def json_file_data_to_db(model):
     """Import JSON file data into the DB.
 
     This is a function to be used in a data migration.
     It's here mostly so that it can be imported and tested.
     """
+    from product_details.models import ProductDetailsFile
+
     PDModel = model or ProductDetailsFile
     if PDModel.objects.exists():
         # nothing to do if there's already data

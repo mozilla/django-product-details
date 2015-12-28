@@ -11,7 +11,7 @@ class MissingJSONData(IOError):
 
 
 __version__ = '0.8.2'
-__all__ = ['__version__', 'product_details', 'version_compare']
+__all__ = ['__version__', 'product_details']
 
 log = logging.getLogger('product_details')
 log.setLevel(settings_fallback('LOG_LEVEL'))

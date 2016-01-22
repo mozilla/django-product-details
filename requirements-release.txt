@@ -2,3 +2,4 @@ Django>=1.8,<1.9
 setuptools>=0.9
 wheel>=0.21
 twine
+requests>=2.0.0

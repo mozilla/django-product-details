@@ -1,14 +1,13 @@
-import json
 import logging
 import re
 from optparse import make_option
 
-from django.utils.six.moves import http_client as httplib
-from django.utils.six.moves.urllib import request
-from django.utils.six.moves.urllib.error import URLError
 from django.utils.six.moves.urllib.parse import urljoin
 from django.core.management.base import NoArgsCommand, CommandError
 from django.utils.module_loading import import_string
+
+import requests
+from requests.exceptions import RequestException
 
 from product_details.utils import settings_fallback
 
@@ -102,19 +101,19 @@ class Command(NoArgsCommand):
 
         # Retrieve file list if modified since last update
         try:
-            resp = request.urlopen(request.Request(src, headers=headers))
-        except URLError as e:
-            if e.code == httplib.NOT_MODIFIED:
-                log.info('{} were up to date.'.format(
-                    'Regions' if dir == 'regions/' else 'Product Details'))
-                return []
-            else:
-                raise CommandError('Could not retrieve file list: %s' % e)
+            resp = requests.get(src, headers=headers)
+        except RequestException as e:
+            raise CommandError('Could not retrieve file list: %s' % e)
+
+        if resp.status_code == requests.codes.not_modified:
+            log.info('{} were up to date.'.format(
+                'Regions' if dir == 'regions/' else 'Product Details'))
+            return []
 
         # Remember Last-Modified header.
-        self.last_mod_response = resp.info()['Last-Modified']
+        self.last_mod_response = resp.headers.get('Last-Modified')
 
-        json_files = set(re.findall(r'href="([^"]+.json)"', resp.read()))
+        json_files = set(re.findall(r'href="([^"]+.json)"', resp.text))
         return json_files
 
     def download_json_file(self, json_file):
@@ -133,33 +132,31 @@ class Command(NoArgsCommand):
 
         # Grab JSON data if modified
         try:
-            resp = request.urlopen(request.Request(
-                urljoin(self.PROD_DETAILS_URL, json_file), headers=headers))
-        except URLError as e:
-            if e.code == httplib.NOT_MODIFIED:
-                log.debug('%s was not modified.' % json_file)
-                return True
-            else:
-                log.warn('Error retrieving %s: %s' % (json_file, e))
-                return False
+            url = urljoin(self.PROD_DETAILS_URL, json_file)
+            resp = requests.get(url, headers=headers)
+        except RequestException as e:
+            log.warn('Error retrieving %s: %s' % (json_file, e))
+            return False
 
-        json_data = resp.read()
+        if resp.status_code == requests.codes.not_modified:
+            log.debug('%s was not modified.' % json_file)
+            return True
 
         # Empty results are fishy
-        if not json_data:
+        if not resp.text:
             log.warn('JSON source for %s was empty. Cowardly denying to '
                      'import empty data.' % json_file)
             return False
 
         # Try parsing the file, import if it's valid JSON.
         try:
-            json.loads(json_data)
+            resp.json()
         except ValueError:
             log.warn('Could not parse JSON data from %s. Skipping.' % json_file)
             return False
 
         # Write JSON data to HD.
         log.debug('Writing new copy of %s.' % json_file)
-        self._storage.update(json_file, json_data, resp.info()['Last-Modified'])
+        self._storage.update(json_file, resp.text, resp.headers.get('Last-Modified'))
 
         return True

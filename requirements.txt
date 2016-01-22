@@ -2,3 +2,4 @@
 tox
 wheel
 twine
+responses

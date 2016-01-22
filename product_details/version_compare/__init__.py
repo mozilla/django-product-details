@@ -15,8 +15,8 @@ _version_re = re.compile(
         (?P<alpha>[a|b]?)   # alpha/beta
         (?P<alpha_ver>\d*)  # alpha/beta version
         (?P<pre>pre)?       # pre release
-        (?P<pre_ver>\d)?    # pre release version""",
-    re.VERBOSE)
+        (?P<pre_ver>\d)?    # pre release version
+    """, re.VERBOSE)
 
 
 @total_ordering
@@ -86,7 +86,8 @@ def version_list(releases, key=None, reverse=True, hide_below='0.0',
     filter is a function that maps Version objects to "include? True/False".
     """
     if not key:
-        key = lambda x: x[1]  # Default: Sort by release date.
+        def key(x):
+            return x[1]  # Default: Sort by release date.
 
     lowest = Version(hide_below)
     versions = []

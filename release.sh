@@ -7,6 +7,9 @@ set -ex
 # run the tests
 tox
 
+# clean up
+rm -rf build dist
+
 # get the latest json data
 ./updatejson.py
 
@@ -21,7 +24,7 @@ cat << EOF
 The built packages are now in './dist'. Test them and then
 upload them to PyPI with the following command:
 
-    $ twine upload -s dist/django-mozilla-product-details-{VERSION}*
+    $ twine upload -s dist/*
 
 See this post for details:
 

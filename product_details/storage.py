@@ -7,6 +7,7 @@ import tempfile
 import shutil
 from datetime import datetime
 
+from django.db import transaction
 from django.utils.six import text_type
 from product_details import settings_defaults
 from product_details.utils import get_django_cache, settings_fallback
@@ -109,6 +110,7 @@ class PDDatabaseStorage(ProductDetailsStorage):
 
         return None
 
+    @transaction.atomic
     def update(self, name, content, last_modified):
         from product_details.models import ProductDetailsFile
 

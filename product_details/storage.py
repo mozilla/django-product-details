@@ -73,7 +73,8 @@ class ProductDetailsStorage(object):
                     data = json.loads(content)
                 except ValueError:
                     return None
-                self._cache.set(cache_key, data, self._cache_timeout)
+                if data:
+                    self._cache.set(cache_key, data, self._cache_timeout)
 
         return data
 

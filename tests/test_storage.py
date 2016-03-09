@@ -60,6 +60,14 @@ class PDStorageClassMixin(object):
             ok_(self.storage.data('the_dude.json') is None)
             eq_(content_mock.call_count, 2)
 
+    def test_no_cache_empty_data(self):
+        """Empty data should not be cached."""
+        with patch.object(self.storage, 'content',
+                          return_value='{}') as content_mock:
+            eq_(self.storage.data('the_dude.json'), {})
+            eq_(self.storage.data('the_dude.json'), {})
+            eq_(content_mock.call_count, 2)
+
     @patch('json.loads')
     def test_no_cache_corrupt_files(self, load_mock):
         """The fact that a file doesn't parse correctly should not be cached."""

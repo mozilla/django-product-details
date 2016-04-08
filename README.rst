@@ -210,6 +210,12 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.11.1 - 2016-04-08
+~~~~~~~~~~~~~~~~~~~
+
+- Include updated JSON data in the release. A problem with deployment in Travis resulted in 0.11
+  failing to include the data.
+
 0.11 - 2016-04-08
 ~~~~~~~~~~~~~~~~~
 

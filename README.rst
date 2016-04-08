@@ -210,13 +210,22 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.11 - 2016-04-08
+~~~~~~~~~~~~~~~~~
+
+- Wrap the update of JSON data in a transaction when using the database storage backend
+  (`bug 1254664 <https://bugzil.la/1254664>`__).
+- Avoid caching empty data (`bug 1254664 <https://bugzil.la/1254664>`__).
+
+Thanks to jgmize for both of these improvements!
+
 0.10 - 2016-01-25
 ~~~~~~~~~~~~~~~~~
 
 - Use requests lib to fetch remote data for reliability and better Py3k compatibility.
 - Update management command to avoid Django 1.9 deprecation warnings. Django 1.8 is now the minimum supported version.
 
-Thanks to Osmose for both of these improvements.
+Thanks to Osmose for both of these improvements!
 
 0.9 - 2015-12-28
 ~~~~~~~~~~~~~~~~

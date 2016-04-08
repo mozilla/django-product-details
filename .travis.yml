@@ -13,10 +13,14 @@ env:
 install:
   - travis_retry pip install tox
 script: tox
+after_success:
+  - travis_retry pip install requests>=2.0.0
+  - ./updatejson.py
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   user: pmclanahan
+  skip_cleanup: true
   password:
     secure: GcjqfBaQPZ7zVv8RsvlihgUaELNp+4X9fdzAF5isjz8MannFIAQHbY25fVrhZSbTNNwxoyzQZEwVhRScBXfAObq2f3FCtYPh6J6u391mqWh8XjbI6QNBUal0hAhRWJpLmt/jKcIDZefON1PHPoJsadEKWOU8b/KsraWlWSG9dCg=
   on:

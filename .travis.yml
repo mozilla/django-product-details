@@ -13,3 +13,12 @@ env:
 install:
   - travis_retry pip install tox
 script: tox
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: pmclanahan
+  password:
+    secure: GcjqfBaQPZ7zVv8RsvlihgUaELNp+4X9fdzAF5isjz8MannFIAQHbY25fVrhZSbTNNwxoyzQZEwVhRScBXfAObq2f3FCtYPh6J6u391mqWh8XjbI6QNBUal0hAhRWJpLmt/jKcIDZefON1PHPoJsadEKWOU8b/KsraWlWSG9dCg=
+  on:
+    tags: true
+    repo: mozilla/django-product-details

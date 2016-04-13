@@ -1,8 +1,9 @@
 import logging
 import re
+from optparse import make_option
 
 from django.utils.six.moves.urllib.parse import urljoin
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import NoArgsCommand, CommandError
 from django.utils.module_loading import import_string
 
 import requests
@@ -17,9 +18,18 @@ log.setLevel(settings_fallback('LOG_LEVEL'))
 STORAGE_CLASS = import_string(settings_fallback('PROD_DETAILS_STORAGE'))
 
 
-class Command(BaseCommand):
+class Command(NoArgsCommand):
     help = 'Update Mozilla product details off SVN.'
     requires_model_validation = False
+    option_list = NoArgsCommand.option_list + (
+        make_option('-f', '--force', action='store_true', dest='force',
+                    default=False, help=(
+                        'Download product details even if they have not been '
+                        'updated since the last fetch.')),
+        make_option('-q', '--quiet', action='store_true', dest='quiet',
+                    default=False, help=(
+                        'If no error occurs, swallow all output.')),
+    )
 
     def __init__(self, *args, **kwargs):
         # some settings
@@ -29,17 +39,7 @@ class Command(BaseCommand):
 
         super(Command, self).__init__(*args, **kwargs)
 
-    def add_arguments(self, parser):
-        parser.add_argument('-f', '--force', action='store_true', dest='force',
-                            default=False, help=(
-                                'Download product details even if they have '
-                                'not been updated since the last fetch.'))
-
-        parser.add_argument('-q', '--quiet', action='store_true', dest='quiet',
-                            default=False, help=(
-                                'If no error occurs, swallow all output.')),
-
-    def handle(self, *args, **options):
+    def handle_noargs(self, **options):
         self.options = options
 
         # Should we be quiet?

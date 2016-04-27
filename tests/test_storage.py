@@ -14,6 +14,7 @@ from django.test.testcases import TestCase
 import product_details
 from product_details import settings_defaults
 from product_details import storage
+from product_details.models import ProductDetailsFile
 
 
 class PDStorageClassMixin(object):
@@ -23,57 +24,37 @@ class PDStorageClassMixin(object):
         self.storage.clear_cache()
 
     def test_cache(self):
-        good_data = {'dude': 'abiding'}
-        with patch.object(self.storage, 'content',
-                          return_value=json.dumps(good_data)) as content_mock:
-            eq_(self.storage.data('the_dude.json'), good_data)
-            eq_(self.storage.data('the_dude.json'), good_data)
-            content_mock.assert_called_once_with('the_dude.json')
-
-        # make sure the cache returns what was put in
-        good_data = {'walter': 'finishing his coffee'}
-        with patch.object(self.storage, 'content',
-                          return_value=json.dumps(good_data)) as content_mock:
-            eq_(self.storage.data('dammit_walter.json'), good_data)
-            eq_(self.storage.data('dammit_walter.json'), good_data)
-            content_mock.assert_called_once_with('dammit_walter.json')
+        good_data = {
+            'the_dude.json': {'dude': 'abiding'},
+            'dammit_walter.json': {'walter': 'finishing his coffee'},
+        }
+        with patch.object(self.storage, 'dir_data', return_value=good_data) as content_mock:
+            eq_(self.storage.data('the_dude.json'), good_data['the_dude.json'])
+            eq_(self.storage.data('the_dude.json'), good_data['the_dude.json'])
+            eq_(self.storage.data('dammit_walter.json'), good_data['dammit_walter.json'])
+            eq_(self.storage.data('dammit_walter.json'), good_data['dammit_walter.json'])
+            content_mock.assert_called_once_with('versions')
 
     def test_cache_delete(self):
-        good_data = {'dude': 'abiding'}
-        with patch.object(self.storage, 'content',
-                          return_value=json.dumps(good_data)) as content_mock:
-            eq_(self.storage.data('the_dude.json'), good_data)
-            eq_(self.storage.data('the_dude.json'), good_data)
-            eq_(self.storage.data('walter.json'), good_data)
-            self.storage.delete_cache('the_dude.json')
-            eq_(self.storage.data('the_dude.json'), good_data)
-            eq_(self.storage.data('the_dude.json'), good_data)
-            eq_(self.storage.data('walter.json'), good_data)
-            content_mock.assert_called_with('the_dude.json')
-            eq_(content_mock.call_count, 3)
-
-    def test_no_cache_missing_files(self):
-        """The fact that a file doesn't exist should not be cached."""
-        with patch.object(self.storage, 'content',
-                          return_value=None) as content_mock:
-            ok_(self.storage.data('the_dude.json') is None)
-            ok_(self.storage.data('the_dude.json') is None)
+        good_data = {
+            'the_dude.json': {'dude': 'abiding'},
+            'dammit_walter.json': {'walter': 'finishing his coffee'},
+        }
+        with patch.object(self.storage, 'dir_data', return_value=good_data) as content_mock:
+            eq_(self.storage.data('the_dude.json'), good_data['the_dude.json'])
+            eq_(self.storage.data('the_dude.json'), good_data['the_dude.json'])
+            eq_(self.storage.data('dammit_walter.json'), good_data['dammit_walter.json'])
+            self.storage.delete_cache('versions')
+            eq_(self.storage.data('the_dude.json'), good_data['the_dude.json'])
+            eq_(self.storage.data('the_dude.json'), good_data['the_dude.json'])
+            eq_(self.storage.data('dammit_walter.json'), good_data['dammit_walter.json'])
+            content_mock.assert_called_with('versions')
             eq_(content_mock.call_count, 2)
 
     def test_no_cache_empty_data(self):
         """Empty data should not be cached."""
-        with patch.object(self.storage, 'content',
-                          return_value='{}') as content_mock:
-            eq_(self.storage.data('the_dude.json'), {})
-            eq_(self.storage.data('the_dude.json'), {})
-            eq_(content_mock.call_count, 2)
-
-    @patch('json.loads')
-    def test_no_cache_corrupt_files(self, load_mock):
-        """The fact that a file doesn't parse correctly should not be cached."""
-        load_mock.side_effect = ValueError
-        with patch.object(self.storage, 'content',
-                          return_value='["dude"]') as content_mock:
+        with patch.object(self.storage, 'dir_data',
+                          return_value={}) as content_mock:
             ok_(self.storage.data('the_dude.json') is None)
             ok_(self.storage.data('the_dude.json') is None)
             eq_(content_mock.call_count, 2)
@@ -159,9 +140,63 @@ class PDFileStorageTests(PDStorageClassMixin, TestCase):
         sto = storage.PDFileStorage(json_dir='/does/not/exist')
         eq_(sto.all_json_files(), [])
 
+    @patch('json.loads')
+    def test_no_cache_corrupt_files(self, load_mock):
+        """The fact that a file doesn't parse correctly should not be cached."""
+        load_mock.side_effect = ValueError
+        with patch.object(self.storage, 'all_json_files', return_value=['the_dude.json']):
+            with patch.object(self.storage, 'content', return_value='dude'):
+                ok_(self.storage.data('the_dude.json') is None)
+                ok_(self.storage.data('the_dude.json') is None)
+                eq_(load_mock.call_count, 2)
+
+    def test_load_correct_files_per_folder(self):
+        with patch.object(self.storage, 'all_json_files',
+                          return_value=['the_dude.json', 'walter.json',
+                                        'regions/es-MX.json', 'regions/de.json']):
+            with patch.object(self.storage, 'content', return_value='["dude"]'):
+                versions_data = self.storage.dir_data('versions')
+                regions_data = self.storage.dir_data('regions')
+                self.assertNotIn('the_dude.json', regions_data)
+                self.assertIn('the_dude.json', versions_data)
+                self.assertNotIn('regions/es-MX.json', versions_data)
+                self.assertIn('regions/es-MX.json', regions_data)
+                self.assertEqual(len(versions_data), 2)
+                self.assertEqual(len(regions_data), 2)
+
 
 class PDDatabaseStorageTests(PDStorageClassMixin, TestCase):
     storage = storage.PDDatabaseStorage()
+
+    def setUp(self):
+        # delete the entries loaded by the migration
+        ProductDetailsFile.objects.all().delete()
+        super(PDDatabaseStorageTests, self).setUp()
+
+    @patch('json.loads')
+    def test_no_cache_corrupt_files(self, load_mock):
+        """The fact that a file doesn't parse correctly should not be cached."""
+        load_mock.side_effect = ValueError
+        ProductDetailsFile.objects.create(name='the_dude.json', content='dude')
+        ok_(self.storage.data('the_dude.json') is None)
+        ok_(self.storage.data('the_dude.json') is None)
+        eq_(load_mock.call_count, 2)
+
+    def test_load_correct_files_per_folder(self):
+        ProductDetailsFile.objects.create(name='the_dude.json', content='["dude"]')
+        ProductDetailsFile.objects.create(name='walter.json', content='["walter"]')
+        ProductDetailsFile.objects.create(name='regions/es-MX.json', content='["como no"]')
+        ProductDetailsFile.objects.create(name='regions/de.json', content='["bier"]')
+        ProductDetailsFile.objects.create(name='regions/', content='')
+        ProductDetailsFile.objects.create(name='/', content='')
+        versions_data = self.storage.dir_data('versions')
+        regions_data = self.storage.dir_data('regions')
+        self.assertNotIn('the_dude.json', regions_data)
+        self.assertIn('the_dude.json', versions_data)
+        self.assertNotIn('regions/es-MX.json', versions_data)
+        self.assertIn('regions/es-MX.json', regions_data)
+        self.assertEqual(len(versions_data), 2)
+        self.assertEqual(len(regions_data), 2)
 
 
 @patch('product_details.product_details._storage', Mock())

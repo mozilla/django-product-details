@@ -1,6 +1,7 @@
 import logging
 import re
 
+from django.db import transaction
 from django.utils.six.moves.urllib.parse import urljoin
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.module_loading import import_string
@@ -26,6 +27,7 @@ class Command(BaseCommand):
         self.PROD_DETAILS_DIR = settings_fallback('PROD_DETAILS_DIR')
         self.PROD_DETAILS_URL = settings_fallback('PROD_DETAILS_URL')
         self._storage = STORAGE_CLASS(json_dir=self.PROD_DETAILS_DIR)
+        self.is_db_storage = self._storage.storage_type == 'db'
 
         super(Command, self).__init__(*args, **kwargs)
 
@@ -50,8 +52,16 @@ class Command(BaseCommand):
         if self.options['force']:
             log.info('Product details update forced.')
 
-        self.download_directory()
-        self.download_directory('regions/')
+        if self.is_db_storage:
+            with transaction.atomic():
+                self.download_directory()
+
+            with transaction.atomic():
+                self.download_directory('regions/')
+
+        else:
+            self.download_directory()
+            self.download_directory('regions/')
 
         log.debug('Product Details update run complete.')
 

@@ -7,7 +7,6 @@ import tempfile
 import shutil
 from datetime import datetime
 
-from django.db import transaction
 from django.utils.six import text_type
 from product_details import settings_defaults
 from product_details.utils import get_django_cache, settings_fallback
@@ -17,6 +16,7 @@ log = logging.getLogger('product_details')
 
 
 class ProductDetailsStorage(object):
+    storage_type = None
     _cache_key = 'prod-details:{0}'
 
     def __init__(self, cache_name=None, cache_timeout=None, **kwargs):
@@ -61,23 +61,30 @@ class ProductDetailsStorage(object):
         """
         raise NotImplementedError()
 
+    def dir_data(self, name):
+        """
+        Return the parsed JSON data of the requested folder name as a dict.
+
+        example:
+
+            {'firefox_versions.json': {'LATEST': '46.0', ...}}
+        """
+        raise NotImplementedError()
+
     def data(self, name):
         """
         Return the parsed JSON data of the requested file name.
         """
-        cache_key = self._get_cache_key(name)
+        # will be "regions" or "versions"
+        dirname = os.path.dirname(name) or 'versions'
+        cache_key = self._get_cache_key(dirname)
         data = self._cache.get(cache_key)
         if data is None:
-            content = self.content(name)
-            if content:
-                try:
-                    data = json.loads(content)
-                except ValueError:
-                    return None
-                if data:
-                    self._cache.set(cache_key, data, self._cache_timeout)
+            data = self.dir_data(dirname)
+            if data:
+                self._cache.set(cache_key, data, self._cache_timeout)
 
-        return data
+        return data.get(name)
 
     def update(self, name, content, last_modified):
         """
@@ -87,13 +94,17 @@ class ProductDetailsStorage(object):
 
 
 class PDDatabaseStorage(ProductDetailsStorage):
-    @staticmethod
-    def file_object(name):
-        from product_details.models import ProductDetailsFile
+    storage_type = 'db'
 
+    def __init__(self, cache_name=None, cache_timeout=None, **kwargs):
+        from product_details.models import ProductDetailsFile
+        self.model_class = ProductDetailsFile
+        super(PDDatabaseStorage, self).__init__(cache_name, cache_timeout, **kwargs)
+
+    def file_object(self, name):
         try:
-            return ProductDetailsFile.objects.get(name=name)
-        except ProductDetailsFile.DoesNotExist:
+            return self.model_class.objects.get(name=name)
+        except self.model_class.DoesNotExist:
             return None
 
     def last_modified(self, name):
@@ -108,25 +119,36 @@ class PDDatabaseStorage(ProductDetailsStorage):
         if fo:
             return text_type(fo.content)
 
-        return None
+    def dir_data(self, name):
+        qs = self.model_class.objects.filter(name__endswith='.json')
+        if name == 'versions':
+            qs = qs.exclude(name__contains='/')
+        else:
+            qs = qs.filter(name__startswith=name + '/')
 
-    @transaction.atomic
+        data = {}
+        for fo in qs:
+            try:
+                data[fo.name] = json.loads(text_type(fo.content))
+            except ValueError:
+                continue
+
+        return data
+
     def update(self, name, content, last_modified):
-        from product_details.models import ProductDetailsFile
-
         fo = self.file_object(name)
         if not fo:
-            fo = ProductDetailsFile(name=name, content=content,
-                                    last_modified=last_modified)
+            fo = self.model_class(name=name, content=content,
+                                  last_modified=last_modified)
         else:
             fo.content = content
             fo.last_modified = last_modified
 
         fo.save()
-        self.delete_cache(name)
 
 
 class PDFileStorage(ProductDetailsStorage):
+    storage_type = 'fs'
     last_modified_dir_file_name = '.last_update'
 
     def __init__(self, json_dir=None, cache_name=None, cache_timeout=None):
@@ -154,6 +176,24 @@ class PDFileStorage(ProductDetailsStorage):
                 return lm_fo.read()
         except (IOError, ValueError):
             return None
+
+    def dir_data(self, name):
+        all_files = self.all_json_files()
+        if name == 'versions':
+            all_files = [fn for fn in all_files if '/' not in fn]
+        else:
+            all_files = [fn for fn in all_files if fn.startswith(name + '/')]
+
+        data = {}
+        for filename in all_files:
+            content = self.content(filename)
+            if content:
+                try:
+                    data[filename] = json.loads(content)
+                except ValueError:
+                    continue
+
+        return data
 
     def content(self, name):
         filename = os.path.join(self.json_dir, name)

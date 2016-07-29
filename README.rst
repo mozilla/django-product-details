@@ -210,6 +210,14 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.12 - 2016-07-29
+~~~~~~~~~~~~~~~~~
+
+- Update caching strategy to cache all files in a single cache entry. The file contents
+  are interdependent, so caching separately caused errors when timeouts were staggered.
+- Change the default data URL to https://product-details.mozilla.org/1.0/
+  (`bug 1282494 <https://bugzil.la/1282494>`__).
+
 0.11.1 - 2016-04-08
 ~~~~~~~~~~~~~~~~~~~
 

@@ -4,7 +4,7 @@ import os
 
 # URL to clone product_details JSON files from.
 # Include trailing slash.
-PROD_DETAILS_URL = 'https://svn.mozilla.org/libs/product-details/json/'
+PROD_DETAILS_URL = 'https://product-details.mozilla.org/1.0/'
 
 # Target dir to drop JSON files into (must be writable)
 PROD_DETAILS_DIR = os.path.join(os.path.dirname(__file__), 'json')

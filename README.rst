@@ -210,6 +210,12 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.12.1 - 2016-08-18
+~~~~~~~~~~~~~~~~~~~
+
+- Add --database option to management command to allow data to be updated
+  in a configured database other than "default".
+
 0.12 - 2016-07-29
 ~~~~~~~~~~~~~~~~~
 

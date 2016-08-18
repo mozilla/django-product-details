@@ -32,31 +32,32 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
 
     def add_arguments(self, parser):
-        parser.add_argument('-f', '--force', action='store_true', dest='force',
-                            default=False, help=(
-                                'Download product details even if they have '
-                                'not been updated since the last fetch.'))
+        parser.add_argument('-f', '--force', action='store_true', dest='force', default=False,
+                            help=('Download product details even if they have '
+                                  'not been updated since the last fetch.'))
 
-        parser.add_argument('-q', '--quiet', action='store_true', dest='quiet',
-                            default=False, help=(
-                                'If no error occurs, swallow all output.')),
+        parser.add_argument('-q', '--quiet', action='store_true', dest='quiet', default=False,
+                            help='If no error occurs, swallow all output.'),
+        parser.add_argument('--database', default='default',
+                            help=('Specifies the database to use, if using a db. '
+                                  'Defaults to "default".')),
 
     def handle(self, *args, **options):
         self.options = options
 
         # Should we be quiet?
-        if self.options['quiet']:
+        if options['quiet']:
             log.setLevel(logging.WARNING)
 
         # Determine last update timestamp and check if we need to update again.
-        if self.options['force']:
+        if options['force']:
             log.info('Product details update forced.')
 
         if self.is_db_storage:
-            with transaction.atomic():
+            with transaction.atomic(using=options['database']):
                 self.download_directory()
 
-            with transaction.atomic():
+            with transaction.atomic(using=options['database']):
                 self.download_directory('regions/')
 
         else:

@@ -199,7 +199,7 @@ class PDDatabaseStorageTests(PDStorageClassMixin, TestCase):
         self.assertEqual(len(regions_data), 2)
 
 
-@patch('product_details.product_details._storage', Mock())
+@patch('product_details.product_details._real_storage', Mock())
 class ProductDetailsTests(TestCase):
     pd = product_details.product_details
 

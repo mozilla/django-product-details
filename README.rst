@@ -214,6 +214,11 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.13 - 2017-08-30
+~~~~~~~~~~~~~~~~~~~
+
+- Lazily load the storage class to avoid import issues in Django 1.9+. Thanks Giorgos!
+
 0.12.1 - 2016-08-18
 ~~~~~~~~~~~~~~~~~~~
 

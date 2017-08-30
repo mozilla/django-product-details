@@ -5,11 +5,11 @@ python:
 install:
   - travis_retry pip install tox
 script: tox
-after_success:
+before_deploy:
   - .tox/py27-dj18/bin/python updatejson.py
 deploy:
   provider: pypi
-  distributions: sdist bdist_wheel
+  distributions: "sdist bdist_wheel"
   user: pmclanahan
   skip_cleanup: true
   password:

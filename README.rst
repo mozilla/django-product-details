@@ -185,6 +185,10 @@ Caveats / Known Issues
                return [(lang.lower(), product_details.languages[lang]['native'])
                        for lang in MY_LANGUAGES]
        LANGUAGES = lazy(LazyLangs, list)()
+3. Using product_details before Django has finished initializing, e.g. in your
+   app's ``__init__.py`` it may raise a
+   ``django.core.exceptions.AppRegistryNotReady`` exception. The lazy loading
+   example from above should help you overcome this issue.
 
 Development
 -----------

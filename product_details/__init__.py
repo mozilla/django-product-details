@@ -26,9 +26,20 @@ class ProductDetails(object):
 
     def __init__(self, json_dir=None, cache_name=None, cache_timeout=None,
                  storage_class=None):
-        storage_class = import_string(storage_class or settings_fallback('PROD_DETAILS_STORAGE'))
-        self._storage = storage_class(cache_name=cache_name, cache_timeout=cache_timeout,
-                                      json_dir=json_dir)
+        self._storage_class = import_string(storage_class or settings_fallback('PROD_DETAILS_STORAGE'))
+        self._json_dir = json_dir
+        self._cache_name = cache_name
+        self._cache_timeout = cache_timeout
+        self._real_storage = None
+
+    @property
+    def _storage(self):
+        if not self._real_storage:
+            self._real_storage = self._storage_class(
+                cache_name=self._cache_name,
+                cache_timeout=self._cache_timeout,
+                json_dir=self._json_dir)
+        return self._real_storage
 
     def __getattr__(self, key):
         data = self._storage.data('{0}.json'.format(key))

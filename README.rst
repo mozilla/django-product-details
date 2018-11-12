@@ -74,7 +74,7 @@ defaults:
    needs to be writable by the user that'll execute the management
    command, and readable by the user running the Django project.
    Defaults to: ``.../install_dir_of_this_app/product_details/json/``
-   (only for use with ``DBFileStorage`` backend (see below)).
+   (only for use with ``PDFileStorage`` backend (see below)).
 
 You can further decide where the JSON data should be stored by using
 a storage backend class. There are 2 provided in the app currently, but

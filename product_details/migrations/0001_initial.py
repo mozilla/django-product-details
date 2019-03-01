@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('name', models.CharField(max_length=250, serialize=False, primary_key=True)),
                 ('content', models.TextField(blank=True)),
-                ('last_modified', models.CharField(help_text=b'Value of Last-Modified HTTP header',
+                ('last_modified', models.CharField(help_text='Value of Last-Modified HTTP header',
                                                    max_length=50)),
             ],
             options={

@@ -22,7 +22,7 @@ install:
   - travis_retry pip install tox
 script: tox
 before_deploy:
-  - .tox/py27-dj18/bin/python updatejson.py
+  - .tox/py36-dj21/bin/python updatejson.py
 deploy:
   provider: pypi
   distributions: "sdist bdist_wheel"
@@ -33,3 +33,4 @@ deploy:
   on:
     tags: true
     repo: mozilla/django-product-details
+    python: 3.6

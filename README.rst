@@ -214,6 +214,11 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.13.1 - 2019-03-03
+~~~~~~~~~~~~~~~~~~~
+
+- Tweak a migration to make Django 2+ under Python 3 happy. Fixes #68. Thanks peterbe!
+
 0.13 - 2017-08-30
 ~~~~~~~~~~~~~~~~~~~
 

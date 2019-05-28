@@ -82,47 +82,17 @@ class Command(BaseCommand):
                 had_errors = True
 
         if had_errors:
-            log.warn('Update run had errors, not storing "last updated" '
-                     'timestamp.')
-        else:
-            # Save Last-Modified timestamp to detect updates against next time.
-            log.debug('Writing last-updated timestamp (%s).' % (
-                self.last_mod_response))
-            self._storage.update(dir or '/', '', self.last_mod_response)
+            log.warn('Update run had errors')
 
     def get_file_list(self, dir):
         """
         Get list of files to be updated from the server.
-
-        If no files have been modified, returns an empty list.
         """
-        # If not forced: Read last updated timestamp
         src = urljoin(self.PROD_DETAILS_URL, dir)
-        self.last_update_local = None
-        headers = {}
-
-        if not self.options['force']:
-            self.last_update_local = self._storage.last_modified(dir or '/')
-            if self.last_update_local:
-                headers = {'If-Modified-Since': self.last_update_local}
-                log.debug('Found last update timestamp: %s' % (
-                    self.last_update_local))
-            else:
-                log.info('No last update timestamp found.')
-
-        # Retrieve file list if modified since last update
         try:
-            resp = requests.get(src, headers=headers)
+            resp = requests.get(src)
         except RequestException as e:
             raise CommandError('Could not retrieve file list: %s' % e)
-
-        if resp.status_code == requests.codes.not_modified:
-            log.info('{} were up to date.'.format(
-                'Regions' if dir == 'regions/' else 'Product Details'))
-            return []
-
-        # Remember Last-Modified header.
-        self.last_mod_response = resp.headers.get('Last-Modified')
 
         json_files = set(re.findall(r'href="([^"]+.json)"', resp.text))
         return json_files

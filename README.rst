@@ -214,6 +214,11 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.14 - 2019-05-28
+~~~~~~~~~~~~~~~~~
+
+- Remove the last-modified check for directory lists. Fixes #72. Thanks pmac!
+
 0.13.1 - 2019-03-03
 ~~~~~~~~~~~~~~~~~~~
 

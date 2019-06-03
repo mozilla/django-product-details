@@ -82,7 +82,13 @@ class Command(BaseCommand):
                 had_errors = True
 
         if had_errors:
-            log.warn('Update run had errors')
+            log.warn('Update run had errors, not storing "last updated" '
+                     'timestamp.')
+        else:
+            # Save Last-Modified timestamp to detect updates against next time.
+            log.debug('Writing last-updated timestamp (%s).' % (
+                self.last_mod_response))
+            self._storage.update(dir or '/', '', self.last_mod_response)
 
     def get_file_list(self, dir):
         """
@@ -93,6 +99,9 @@ class Command(BaseCommand):
             resp = requests.get(src)
         except RequestException as e:
             raise CommandError('Could not retrieve file list: %s' % e)
+
+        # Remember Last-Modified header.
+        self.last_mod_response = resp.headers.get('Last-Modified')
 
         json_files = set(re.findall(r'href="([^"]+.json)"', resp.text))
         return json_files

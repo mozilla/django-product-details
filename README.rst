@@ -214,6 +214,11 @@ It will run the tests, update the JSON data, and build and upload the package to
 Change Log
 ----------
 
+0.14.1 - 2019-06-03
+~~~~~~~~~~~~~~~~~~~
+
+- Add back last-modified data for directory lists in the data to avoid migration failure.
+
 0.14 - 2019-05-28
 ~~~~~~~~~~~~~~~~~
 

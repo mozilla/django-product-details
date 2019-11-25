@@ -208,8 +208,11 @@ current Python version by running ``./runtests.py``.
 Releasing
 ---------
 
-If you are logged into PyPI as an owner of this package, then just run ``./release.sh``.
-It will run the tests, update the JSON data, and build and upload the package to PyPI.
+1. Update the version number in ``product_details/__init__.py``.
+2. Add an entry to the change log in the README file.
+3. Tag the commit where you changed the above with the version number: e.g. ``0.14.1``.
+4. Push the commit and tag to the github repo.
+5. Github will build and release the package to PyPI.
 
 Change Log
 ----------

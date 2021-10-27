@@ -70,8 +70,8 @@ class ProductDetails(object):
         if '-' in locale:
             fallback, _, _ = locale.partition('-')
             lookup.insert(1, fallback)
-        for l in lookup:
-            key = 'regions/%s.json' % l
+        for lk in lookup:
+            key = 'regions/%s.json' % lk
             data = self._storage.data(key)
             if data:
                 return data

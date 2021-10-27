@@ -3,14 +3,17 @@ import json
 import logging
 import os
 import os.path
-import tempfile
 import shutil
+import tempfile
 from datetime import datetime
 
-from django.utils.six import text_type
+try:
+    from django.utils.six import text_type
+except ImportError:
+    text_type = str
+
 from product_details import settings_defaults
 from product_details.utils import get_django_cache, settings_fallback
-
 
 log = logging.getLogger('product_details')
 

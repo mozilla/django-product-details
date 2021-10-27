@@ -1,6 +1,9 @@
 import functools
 
-from django.utils.six.moves import cPickle
+try:
+    from django.utils.six.moves import cPickle as _pickle
+except ImportError:
+    import pickle as _pickle
 
 
 def memoize(fctn):
@@ -12,7 +15,7 @@ def memoize(fctn):
 
     @functools.wraps(fctn)
     def memo(*args, **kwargs):
-        haxh = cPickle.dumps((args, sorted(kwargs.items())))
+        haxh = _pickle.dumps((args, sorted(kwargs.items())))
         if haxh not in memory:
             memory[haxh] = fctn(*args, **kwargs)
         return memory[haxh]

@@ -3,9 +3,13 @@ python: 3.6
 dist: xenial
 matrix:
   include:
+    - python: 3.9
+      env: TOXENV=py39-dj20,py39-dj21,py39-dj22,py39-dj30,py39-dj31,py39-dj32,flake8
+    - python: 3.8
+      env: TOXENV=py38-dj20,py38-dj21,py38-dj22,py38-dj30,py38-dj31,py38-dj32,flake8
     - python: 3.7
       sudo: true
-      env: TOXENV=py37-dj20,py37-dj21,py37-dj22,flake8
+      env: TOXENV=py37-dj20,py37-dj21,py37-dj22,py37-dj30,py37-dj31,py37-dj32,flake8
     - python: 3.6
       env: TOXENV=py36-dj20,py36-dj21,py36-dj22,flake8
     - python: 3.5

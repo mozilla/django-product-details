@@ -1,16 +1,18 @@
 import logging
 import re
 
-from django.db import transaction
-from django.utils.six.moves.urllib.parse import urljoin
+import requests
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.utils.module_loading import import_string
 
-import requests
-from requests.exceptions import RequestException
+try:
+    from django.utils.six.moves.urllib.parse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 
 from product_details.utils import settings_fallback
-
+from requests.exceptions import RequestException
 
 log = logging.getLogger('prod_details')
 log.addHandler(logging.StreamHandler())

@@ -1,11 +1,13 @@
 import copy
 
 from django.test import SimpleTestCase
-
 from nose.tools import eq_
-
-from product_details.version_compare import Version, version_dict, version_int, version_list
-
+from product_details.version_compare import (
+    Version,
+    version_dict,
+    version_int,
+    version_list,
+)
 
 # Versions to test listed in ascending order, none can be equal.
 # TODO Add support for asterisks.
@@ -29,13 +31,20 @@ COMPARISONS = (
     "2.1",
     "3.0.-1",
     "3.0",
+    "94.0",
+    "94.1.0",
+    "100.0",
+    "100.1.0",
+    "100.2.0",
+    "101.1.0",
+    "105.0",
 )
 
 # Every version in this list means the same version number.
 # TODO add support for + signs.
 EQUALITY = (
-    "1.1pre",
-    "1.1pre0",
+    "100.1pre",
+    "100.1pre0",
     # "1.0+",
 )
 
@@ -66,6 +75,13 @@ class TestVersions(SimpleTestCase):
             '3.6.4b1': '3.6.4b1',
             '3.6.4build1': '3.6.4',
             '3.6.4build17': '3.6.4',
+            '100.2': '100.2',
+            '100.2b1': '100.2',
+            '100.1.1b99': '100.1.1',
+            '100.1.1build99': '100.1.1',
+            '105.1.1b99': '105.1.1',
+            '107.1.1build99': '107.1.1',
+            '400.1.3.5alpha': '400.1.3.5',
         }
         for v in versions:
             ver = Version(v)
@@ -76,7 +92,7 @@ class TestVersions(SimpleTestCase):
         version_dict and _int can use each other's data but must not overwrite
         it.
         """
-        version_string = '4.0b8pre'
+        version_string = '104.0b8pre'
         dict1 = copy.copy(version_dict(version_string))
         int1 = version_int(version_string)
         dict2 = version_dict(version_string)
@@ -91,8 +107,10 @@ class TestVersions(SimpleTestCase):
             '3.0': '2010-12-01',
             '4.0b1': '2010-11-24',
             '4.0b2build7': '2010-12-05',
+            '100.0b1': '2022-01-01',  # fake/proof-of-concept date
+            '100.0b1build7': '2022-01-02',  # fake/proof-of-concept date
         }
-        expected = ('4.0b2', '4.0b1')
+        expected = ('100.0b1', '4.0b2', '4.0b1')
 
         test_list = version_list(my_versions, hide_below='4.0b1')
 

@@ -1,32 +1,20 @@
 language: python
-python: 3.6
-dist: xenial
+python: 3.9
+dist: focal
 matrix:
   include:
     - python: 3.9
-      env: TOXENV=py39-dj20,py39-dj21,py39-dj22,py39-dj30,py39-dj31,py39-dj32,flake8
+      env: TOXENV=py39-dj22,py39-dj32,flake8
     - python: 3.8
-      env: TOXENV=py38-dj20,py38-dj21,py38-dj22,py38-dj30,py38-dj31,py38-dj32,flake8
+      env: TOXENV=py38-dj22,py38-dj32,flake8
     - python: 3.7
       sudo: true
-      env: TOXENV=py37-dj20,py37-dj21,py37-dj22,py37-dj30,py37-dj31,py37-dj32,flake8
-    - python: 3.6
-      env: TOXENV=py36-dj20,py36-dj21,py36-dj22,flake8
-    - python: 3.5
-      env: TOXENV=py35-dj18,py35-dj111,py35-dj20,py35-dj21,py35-dj22,flake8
-    - python: 3.4
-      env: TOXENV=py34-dj18,py34-dj111,py34-dj20,flake8
-    - python: 2.7
-      env: TOXENV=py27-dj18,flake8
-    - python: pypy
-      env: TOXENV=pypy-dj18,pypy-dj111,flake8
-    - python: pypy3
-      env: TOXENV=pypy3-dj20,pypy3-dj21,pypy3-dj22,flake8
+      env: TOXENV=py37-dj22,py37-dj32,flake8
 install:
   - travis_retry pip install tox
 script: tox
 before_deploy:
-  - .tox/py36-dj21/bin/python updatejson.py
+  - .tox/py39-dj32/bin/python updatejson.py
 deploy:
   provider: pypi
   distributions: "sdist bdist_wheel"
@@ -37,4 +25,4 @@ deploy:
   on:
     tags: true
     repo: mozilla/django-product-details
-    python: 3.6
+    python: 3.9

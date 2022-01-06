@@ -6,6 +6,7 @@ def uniquifier(seq, key=None):
     Borrowed in part from http://www.peterbe.com/plog/uniqifiers-benchmark
     """
     if key is None:
+
         def key(x):
             return x
 

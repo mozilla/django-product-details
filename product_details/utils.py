@@ -15,9 +15,11 @@ def settings_fallback(key):
 def get_django_cache(cache_name):
     try:
         from django.core.cache import caches  # django 1.7+
+
         return caches[cache_name]
     except ImportError:
         from django.core.cache import get_cache
+
         return get_cache(cache_name)
     except ImproperlyConfigured:
         # dance to get around not-setup-django at import time

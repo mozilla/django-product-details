@@ -100,7 +100,7 @@ class Command(BaseCommand):
                 had_errors = True
 
         if had_errors:
-            log.warn('Update run had errors, not storing "last updated" ' "timestamp.")
+            log.warn('Update run had errors, not storing "last updated" timestamp.')
         else:
             # Save Last-Modified timestamp to detect updates against next time.
             log.debug("Writing last-updated timestamp (%s)." % (self.last_mod_response))

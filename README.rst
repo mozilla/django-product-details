@@ -196,9 +196,11 @@ Development
 Patches are welcome.
 
 To run tests, install ``tox`` and run ``tox`` from the project root.
-This will run the tests in Python 2.6 and 2.7. If you don't have both of
-those available, install ``nose`` and ``Mock`` and run the tests in your
-current Python version by running ``./runtests.py``.
+This will run the tests in Python 3.7, 3.8 and 3.9 against
+various appropriate Django versions. If you don't have ``tox`` and/or all the
+versions of Python available, install ``nose``, ``mock``, ``requests``,
+``responses`` and ``Django`` (see ``tox.ini``'s ``deps``) and run the
+tests in your current Python version by running ``./runtests.py``.
 
 .. |Travis| image:: https://img.shields.io/travis/mozilla/django-product-details.svg
    :target: https://travis-ci.org/mozilla/django-product-details/

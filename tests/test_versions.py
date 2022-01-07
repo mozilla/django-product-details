@@ -4,7 +4,12 @@ from django.test import SimpleTestCase
 
 from nose.tools import eq_
 
-from product_details.version_compare import Version, version_dict, version_int, version_list
+from product_details.version_compare import (
+    Version,
+    version_dict,
+    version_int,
+    version_list,
+)
 
 
 # Versions to test listed in ascending order, none can be equal.
@@ -47,9 +52,9 @@ class TestVersions(SimpleTestCase):
         for i, v1 in numlist:
             for j, v2 in numlist:
                 if i < j:
-                    assert v1 < v2, '%s is not less than %s' % (v1, v2)
+                    assert v1 < v2, "%s is not less than %s" % (v1, v2)
                 elif i > j:
-                    assert v1 > v2, '%s is not greater than %s' % (v1, v2)
+                    assert v1 > v2, "%s is not greater than %s" % (v1, v2)
                 else:
                     eq_(v1, v2)
 
@@ -61,11 +66,11 @@ class TestVersions(SimpleTestCase):
     def test_simplify_version(self):
         """Make sure version simplification works."""
         versions = {
-            '4.0b1': '4.0b1',
-            '3.6': '3.6',
-            '3.6.4b1': '3.6.4b1',
-            '3.6.4build1': '3.6.4',
-            '3.6.4build17': '3.6.4',
+            "4.0b1": "4.0b1",
+            "3.6": "3.6",
+            "3.6.4b1": "3.6.4b1",
+            "3.6.4build1": "3.6.4",
+            "3.6.4build17": "3.6.4",
         }
         for v in versions:
             ver = Version(v)
@@ -76,7 +81,7 @@ class TestVersions(SimpleTestCase):
         version_dict and _int can use each other's data but must not overwrite
         it.
         """
-        version_string = '4.0b8pre'
+        version_string = "4.0b8pre"
         dict1 = copy.copy(version_dict(version_string))
         int1 = version_int(version_string)
         dict2 = version_dict(version_string)
@@ -87,14 +92,14 @@ class TestVersions(SimpleTestCase):
     def test_version_list(self):
         """Test if version lists are generated properly."""
         my_versions = {
-            '4.0b2build8': '2010-12-06',
-            '3.0': '2010-12-01',
-            '4.0b1': '2010-11-24',
-            '4.0b2build7': '2010-12-05',
+            "4.0b2build8": "2010-12-06",
+            "3.0": "2010-12-01",
+            "4.0b1": "2010-11-24",
+            "4.0b2build7": "2010-12-05",
         }
-        expected = ('4.0b2', '4.0b1')
+        expected = ("4.0b2", "4.0b1")
 
-        test_list = version_list(my_versions, hide_below='4.0b1')
+        test_list = version_list(my_versions, hide_below="4.0b1")
 
         # Check if the generated version list is the same as we expect.
         eq_(len(expected), len(test_list))

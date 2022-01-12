@@ -116,7 +116,7 @@ def dict_from_int(version_int):
     (rem, d["minor3"]) = divmod(rem, 100)
     (rem, d["minor2"]) = divmod(rem, 100)
     (rem, d["minor1"]) = divmod(rem, 100)
-    (rem, d["major"]) = divmod(rem, 100)
+    d["major"] = rem
     d["pre"] = None if d["pre"] else "pre"
     d["alpha"] = {0: "a", 1: "b"}.get(d["alpha"])
 

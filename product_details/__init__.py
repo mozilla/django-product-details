@@ -10,7 +10,7 @@ class MissingJSONData(IOError):
     pass
 
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __all__ = ["__version__", "product_details", "version_compare"]
 
 log = logging.getLogger("product_details")

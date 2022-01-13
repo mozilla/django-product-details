@@ -219,6 +219,20 @@ Releasing
 Change Log
 ----------
 
+1.0.1 - 2022-01-13
+~~~~~~~~~~~~~~~~~~
+
+- Updates to be able to handle Firefox versions over 100. Thanks robhudson!
+
+1.0.0 - 2022-01-07
+~~~~~~~~~~~~~~~~~~
+
+- Drop Python 2 support.
+- Covert codebase to use black formatting.
+- Update the tox testing configuration to add new Django and Python releases.
+
+Thanks to stevejalim and tasos for these improvements.
+
 0.14.1 - 2019-06-03
 ~~~~~~~~~~~~~~~~~~~
 

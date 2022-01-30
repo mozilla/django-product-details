@@ -1,7 +1,7 @@
 Mozilla Product Details for Django
 ==================================
 
-|Travis| |PyPI|
+|PyPI|
 
 **Mozilla Product Details** is a
 `library <http://viewvc.svn.mozilla.org/vc/libs/product-details/README?view=markup>`__
@@ -202,8 +202,6 @@ versions of Python available, install ``nose``, ``mock``, ``requests``,
 ``responses`` and ``Django`` (see ``tox.ini``'s ``deps``) and run the
 tests in your current Python version by running ``./runtests.py``.
 
-.. |Travis| image:: https://img.shields.io/travis/mozilla/django-product-details.svg
-   :target: https://travis-ci.org/mozilla/django-product-details/
 .. |PyPI| image:: https://img.shields.io/pypi/v/django-mozilla-product-details.svg
    :target: https://pypi.python.org/pypi/django-mozilla-product-details
 

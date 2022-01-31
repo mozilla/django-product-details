@@ -1,4 +1,4 @@
-name: "Run tests in CI"
+name: "CI" # Note that this name appears in the README's badge
 on: [push]
 jobs:
   build:

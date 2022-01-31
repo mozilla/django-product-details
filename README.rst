@@ -1,7 +1,7 @@
 Mozilla Product Details for Django
 ==================================
 
-|PyPI|
+|GHACI| |PyPI|
 
 **Mozilla Product Details** is a
 `library <http://viewvc.svn.mozilla.org/vc/libs/product-details/README?view=markup>`__
@@ -204,6 +204,9 @@ tests in your current Python version by running ``./runtests.py``.
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/django-mozilla-product-details.svg
    :target: https://pypi.python.org/pypi/django-mozilla-product-details
+
+.. |GHACI| image:: https://github.com/mozilla/django-product-details/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/mozilla/django-product-details/actions
 
 Releasing
 ---------

@@ -220,6 +220,11 @@ Releasing
 Change Log
 ----------
 
+1.0.2 - 2022-01-31
+~~~~~~~~~~~~~~~~~~
+
+- Move CI to Github Actions. Thanks stevejalim!
+
 1.0.1 - 2022-01-13
 ~~~~~~~~~~~~~~~~~~
 

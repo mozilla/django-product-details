@@ -23,9 +23,6 @@ jobs:
           - python-version: "3.7"
             django-tox-env: "django40"
 
-          - python-version: "pypy-3.7"
-            django-tox-env: "django40"
-
           - python-version: "3.10"
             django-tox-env: "django22"
 
@@ -39,34 +36,6 @@ jobs:
         run: pip install tox
       - name: Run tox
         run: tox -e py${{ matrix.python-version }}-${{ matrix.django-tox-env }} --skip-missing-interpreter=false
-
-  # DISABLED: needs a viable way to upgrade pypy-bundled sqlite to be 3.8.3, not 3.7.17, else Django won't start
-  # build-pypy:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       python-version:
-  #         - "pypy-3.7"
-  #         - "pypy-3.8"
-  #       django-tox-env:
-  #         - "django22"
-  #         - "django32"
-  #         - "django40"
-  #       exclude:
-  #         # We don't want every combination of the above, as some are not compatible
-  #         - python-version: "pypy-3.7"
-  #           django-tox-env: "django40"
-
-  #   name: Python ${{ matrix.python-version }} + ${{ matrix.django-tox-env }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-python@v2
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #     - name: Install tox
-  #       run: pip install tox
-  #     - name: Run tox
-  #       run: tox -e ${{ matrix.python-version }}-${{ matrix.django-tox-env }} --skip-missing-interpreter=false
 
   lint:
     runs-on: ubuntu-latest

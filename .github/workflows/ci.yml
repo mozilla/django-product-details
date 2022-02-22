@@ -1,26 +1,82 @@
 name: "CI" # Note that this name appears in the README's badge
 on: [push]
 jobs:
-  build:
+  build-cpython:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version:
+          # CPython
           - "3.7"
           - "3.8"
           - "3.9"
-          - "pypy-3.7"
-          - "pypy-3.8"
-    name: Python ${{ matrix.python-version }} in use
+          - "3.10"
+        django-tox-env:
+          - "django22"
+          - "django32"
+          - "django40"
+        exclude:
+          # We don't want every combination of the above, as some are not compatible
+          - python-version: "3.6"
+            django-tox-env: "django40"
+
+          - python-version: "3.7"
+            django-tox-env: "django40"
+
+          - python-version: "pypy-3.7"
+            django-tox-env: "django40"
+
+          - python-version: "3.10"
+            django-tox-env: "django22"
+
+    name: Python ${{ matrix.python-version }} + ${{ matrix.django-tox-env }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          # Note that all envs will have the default version of Python available,
-          # too. This is 3.8 at time of writing.
           python-version: ${{ matrix.python-version }}
-          architecture: "x64" # optional x64 (default) or x86.
       - name: Install tox
         run: pip install tox
       - name: Run tox
-        run: tox
+        run: tox -e py${{ matrix.python-version }}-${{ matrix.django-tox-env }} --skip-missing-interpreter=false
+
+  # DISABLED: needs a viable way to upgrade pypy-bundled sqlite to be 3.8.3, not 3.7.17, else Django won't start
+  # build-pypy:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version:
+  #         - "pypy-3.7"
+  #         - "pypy-3.8"
+  #       django-tox-env:
+  #         - "django22"
+  #         - "django32"
+  #         - "django40"
+  #       exclude:
+  #         # We don't want every combination of the above, as some are not compatible
+  #         - python-version: "pypy-3.7"
+  #           django-tox-env: "django40"
+
+  #   name: Python ${{ matrix.python-version }} + ${{ matrix.django-tox-env }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Install tox
+  #       run: pip install tox
+  #     - name: Run tox
+  #       run: tox -e ${{ matrix.python-version }}-${{ matrix.django-tox-env }} --skip-missing-interpreter=false
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Flake 8
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install test requirements
+        run: pip install tox flake8
+      - name: Run tox
+        run: tox -e py3.9-flake8

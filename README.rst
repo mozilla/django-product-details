@@ -219,7 +219,7 @@ Releasing
 6. Github will build and release the package to PyPI. Monitor the progress via the Actions tab.
 
 Note, if you need to manually build a release on your local machine, be sure
-to run `python updatejson.py` before you run `python -m build .` so that the
+to run ``python updatejson.py`` before you run ``python -m build .`` so that the
 JSON data files are definitely included in the artifacts you generate.
 
 Change Log

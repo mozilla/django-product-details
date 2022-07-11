@@ -1,7 +1,13 @@
 name: "CI" # Note that this name appears in the README's badge
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  release:
+    types: [published]
 jobs:
-  build-cpython:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,3 +55,27 @@ jobs:
         run: pip install tox flake8
       - name: Run tox
         run: tox -e py3.9-flake8
+
+  release:
+    name: django-mozilla-product-details Release
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs:
+      - test
+      - lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install lightest dependencies for successful packaging
+        run: pip install Django requests build
+      - name: Ensure the latest product-details json files are pulled in
+        run: python updatejson.py
+      - name: Build package for upload to PyPI
+        run: python -m build .
+      - name: Upload the distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.5.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

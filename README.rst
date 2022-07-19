@@ -213,9 +213,14 @@ Releasing
 
 1. Update the version number in ``product_details/__init__.py``.
 2. Add an entry to the change log in the README file.
-3. Tag the commit where you changed the above with the version number: e.g. ``0.14.1``.
+3. Tag the commit where you changed the above with the version number: e.g. ``1.0.4``.
 4. Push the commit and tag to the github repo.
-5. Github will build and release the package to PyPI.
+5. Create a new GitHub release, selecting the tag you just pushed to specify the commit. Hit Publish.
+6. Github will build and release the package to PyPI. Monitor the progress via the Actions tab.
+
+Note, if you need to manually build a release on your local machine, be sure
+to run ``python updatejson.py`` before you run ``python -m build .`` so that the
+JSON data files are definitely included in the artifacts you generate.
 
 Change Log
 ----------

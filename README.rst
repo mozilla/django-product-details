@@ -3,22 +3,26 @@ Mozilla Product Details for Django
 
 |GHACI| |PyPI|
 
-**Mozilla Product Details** is a
-`library <http://viewvc.svn.mozilla.org/vc/libs/product-details/README?view=markup>`__
+**Product Details** is a public JSON API and a
+`repository <https://github.com/mozilla-releng/product-details/>`__
 containing information about the latest versions, localizations, etc. of
 `Mozilla <http://www.mozilla.org>`__ products (most notably Firefox,
 Firefox for mobile, and Thunderbird).
 
 From the original `README
-file <http://viewvc.svn.mozilla.org/vc/libs/product-details/README?view=markup>`__:
+file <https://github.com/mozilla-releng/product-details/blob/main/README.rst>`__:
 
 ::
 
-    This library holds information about the current builds of Firefox and
-    Thunderbird that Mozilla ships including:
+    Product Details is a public JSON API which contains release information
+    for Firefox (desktop and mobile) and Thunderbird. The data is managed by
+    the Release Management team through Ship-it and exported available at
+    this domain:
 
-    - Latest version numbers for all builds
-    - English and Native names for all languages we support
+    - htttps://product-details.mozilla.org/
+
+Examples of data and files provided are listed on `Product-Details
+wiki <https://wiki.mozilla.org/Release_Management/Product_details>`__.
 
 This is a `Django <http://www.djangoproject.com/>`__ app allowing this
 data to be used in Django projects. A Django management command can be
@@ -28,18 +32,20 @@ Mozilla.
 Why?
 ----
 
-The `data source <http://svn.mozilla.org/libs/product-details/>`__ of
-Mozilla Product Details is a PHP library kept on the Mozilla SVN server,
-and was originally written so it could be included into PHP projects via
-an `SVN external <http://svnbook.red-bean.com/en/1.0/ch07s03.html>`__. A
-simple ``svn up`` would fetch the latest data when it became available.
+The data provides by this API is meant to be the source of truth for all
+tools needing to know specific information about a Firefox release or
+channel.
 
-In the meantime, the Product Details library received an additional JSON
-feed, allowing non-PHP projects to consume the data. If, however, the
-consumer is not kept in SVN like the library is, there is no easy way to
-keep the data up to date.
+Historically that data was managed with direct commits into a code
+repository on the Mozilla SVN server. The current version 1.0 of the API
+is meant to be fully compatible with the version previously hosted on
+SVN.
+The `data source <https://github.com/mozilla-releng/product-details/>`__
+of Mozilla Product Details from git repository is published to
+product-details.mozilla.org.
 
-For Django projects, this app solves that problem.
+For Django projects, this app manages updates and caching of the data,
+and turns the JSONs into Python objects.
 
 Getting Started
 ---------------
@@ -66,8 +72,8 @@ No configuration should be necessary. However, you can add the
 following settings to your ``settings.py`` file if you disagree with the
 defaults:
 
--  ``PROD_DETAILS_URL`` defaults to the JSON directory on the Mozilla
-   SVN server. If you have a secondary mirror at hand, or you want this
+-  ``PROD_DETAILS_URL`` defaults to the JSON API root on ``product-details.mozilla.org``.
+   If you have a secondary mirror at hand, or you want this
    tool to download completely unrelated JSON files from somewhere else,
    adjust this setting. Include a trailing slash.
 -  ``PROD_DETAILS_DIR`` is the target directory for the JSON files. It

@@ -27,7 +27,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["Django>=3.2", "requests>=2.21.0"],
+    install_requires=["Django>=3.2", "requests>=2.26.0"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",

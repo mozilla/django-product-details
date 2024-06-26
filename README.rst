@@ -19,7 +19,7 @@ file <https://github.com/mozilla-releng/product-details/blob/main/README.rst>`__
     the Release Management team through Ship-it and exported available at
     this domain:
 
-    - htttps://product-details.mozilla.org/
+    - https://product-details.mozilla.org/
 
 Examples of data and files provided are listed on `Product-Details
 wiki <https://wiki.mozilla.org/Release_Management/Product_details>`__.
@@ -32,7 +32,7 @@ Mozilla.
 Why?
 ----
 
-The data provides by this API is meant to be the source of truth for all
+The data provided by this API is meant to be the source of truth for all
 tools needing to know specific information about a Firefox release or
 channel.
 
@@ -41,11 +41,11 @@ repository on the Mozilla SVN server. The current version 1.0 of the API
 is meant to be fully compatible with the version previously hosted on
 SVN.
 The `data source <https://github.com/mozilla-releng/product-details/>`__
-of Mozilla Product Details from git repository is published to
+of Mozilla Product Details from the git repository is published to
 product-details.mozilla.org.
 
 For Django projects, this app manages updates and caching of the data,
-and turns the JSONs into Python objects.
+and turns the JSON data into Python objects.
 
 Getting Started
 ---------------

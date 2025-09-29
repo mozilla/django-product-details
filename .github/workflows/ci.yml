@@ -12,30 +12,25 @@ jobs:
     strategy:
       matrix:
         python-version:
-          # CPython
-          - "3.7"
-          - "3.8"
           - "3.9"
           - "3.10"
+          - "3.11"
         django-tox-env:
-          - "django22"
           - "django32"
-          - "django40"
-        exclude:
-          # We don't want every combination of the above, as some are not compatible
-          - python-version: "3.6"
-            django-tox-env: "django40"
-
-          - python-version: "3.7"
-            django-tox-env: "django40"
-
-          - python-version: "3.10"
-            django-tox-env: "django22"
-
+          - "django42"
+          - "django51"
+          - "django52"
+        exclude: # We don't want every combination of the above, as some are not compatible
+          - python-version: "3.11"
+            django-tox-env: "django32"
+          - python-version: "3.9"
+            django-tox-env: "django51"
+          - python-version: "3.9"
+            django-tox-env: "django52"
     name: Python ${{ matrix.python-version }} + ${{ matrix.django-tox-env }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install tox
@@ -45,14 +40,14 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    name: Flake 8
+    name: Flake8
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: 3.9
-      - name: Install test requirements
-        run: pip install tox flake8
+          python-version: "3.9"
+      - name: Install tox
+        run: pip install tox
       - name: Run tox
         run: tox -e py3.9-flake8
 
@@ -64,11 +59,11 @@ jobs:
       - lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: 3.9
-      - name: Install lightest dependencies for successful packaging
+          python-version: "3.9"
+      - name: Install packaging dependencies
         run: pip install Django requests build
       - name: Ensure the latest product-details json files are pulled in
         run: python updatejson.py

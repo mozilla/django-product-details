@@ -79,6 +79,22 @@ jobs:
         run: python updatejson.py
       - name: Build package for upload to PyPI
         run: python -m build .
+      - name: Verify the distributions contain product-details data
+        run: python verifydist.py
+      - name: Smoke-test the built wheel
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/pip install dist/*.whl
+          cd /tmp && /tmp/smoke/bin/python -c "
+          import django
+          from django.conf import settings
+          settings.configure()
+          django.setup()
+          from product_details import product_details
+          version = product_details.firefox_versions['LATEST_FIREFOX_VERSION']
+          assert version, 'installed package has no firefox_versions.json data'
+          print('Installed package reports LATEST_FIREFOX_VERSION =', version)
+          "
       - name: Upload the distribution to PyPI
         uses: pypa/gh-action-pypi-publish@v1.14.3
         with:

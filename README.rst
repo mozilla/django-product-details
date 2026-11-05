@@ -224,9 +224,15 @@ Releasing
 5. Create a new GitHub release, selecting the tag you just pushed to specify the commit. Hit Publish.
 6. GitHub will build and release the package to PyPI. Monitor the progress via the Actions tab.
 
+The release workflow fetches the latest product-details JSON data with
+``updatejson.py`` before building, then runs ``verifydist.py`` and installs the
+built wheel to confirm the data is really inside the artifacts. If either check
+fails, nothing is uploaded to PyPI.
+
 Note, if you need to manually build a release on your local machine, be sure
 to run ``python updatejson.py`` before you run ``python -m build .`` so that the
-JSON data files are definitely included in the artifacts you generate.
+JSON data files are definitely included in the artifacts you generate, and run
+``python verifydist.py`` afterwards to check that they are.
 
 Change Log
 ----------

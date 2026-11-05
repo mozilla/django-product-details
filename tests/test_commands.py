@@ -1,9 +1,9 @@
+from unittest.mock import patch
+
 from django.core.management import call_command
 from django.test.testcases import TestCase
 
 import responses
-from mock import patch
-from nose.tools import eq_
 
 from product_details.storage import ProductDetailsStorage
 
@@ -63,7 +63,7 @@ class UpdateProductDetailsTests(TestCase):
         with self.settings(PROD_DETAILS_URL="http://example.com/"):
             call_command("update_product_details")
 
-        eq_(
+        self.assertEqual(
             self.storage.documents["test.json"],
             {
                 "content": '{"foo": "bar"}',

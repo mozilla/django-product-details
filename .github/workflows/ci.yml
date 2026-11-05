@@ -12,25 +12,35 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
         django-tox-env:
-          - "django32"
           - "django42"
-          - "django51"
           - "django52"
+          - "django60"
+          - "django61"
         exclude: # We don't want every combination of the above, as some are not compatible
+          # Django 4.2 supports Python 3.8-3.12
+          - python-version: "3.13"
+            django-tox-env: "django42"
+          - python-version: "3.14"
+            django-tox-env: "django42"
+          # Django 6.x requires Python 3.12+
+          - python-version: "3.10"
+            django-tox-env: "django60"
+          - python-version: "3.10"
+            django-tox-env: "django61"
           - python-version: "3.11"
-            django-tox-env: "django32"
-          - python-version: "3.9"
-            django-tox-env: "django51"
-          - python-version: "3.9"
-            django-tox-env: "django52"
+            django-tox-env: "django60"
+          - python-version: "3.11"
+            django-tox-env: "django61"
     name: Python ${{ matrix.python-version }} + ${{ matrix.django-tox-env }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install tox
@@ -42,14 +52,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Flake8
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Install tox
         run: pip install tox
       - name: Run tox
-        run: tox -e py3.9-flake8
+        run: tox -e py3.12-flake8
 
   release:
     name: django-mozilla-product-details Release
@@ -59,10 +69,10 @@ jobs:
       - lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Install packaging dependencies
         run: pip install Django requests build
       - name: Ensure the latest product-details json files are pulled in

@@ -202,11 +202,11 @@ Development
 Patches are welcome.
 
 To run tests, install ``tox`` and run ``tox`` from the project root.
-This will run the tests in Python 3.9, 3.10 and 3.11 against
+This will run the tests in Python 3.10 through 3.14 against
 various appropriate Django versions. If you don't have ``tox`` and/or all the
-versions of Python available, install ``nose``, ``mock``, ``requests``,
-``responses`` and ``Django`` (see ``tox.ini``'s ``deps``) and run the
-tests in your current Python version by running ``./runtests.py``.
+versions of Python available, install ``requests``, ``responses`` and
+``Django`` (see ``tox.ini``'s ``deps``) and run the tests in your current
+Python version by running ``./runtests.py``.
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/django-mozilla-product-details.svg
    :target: https://pypi.python.org/pypi/django-mozilla-product-details

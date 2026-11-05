@@ -2,7 +2,7 @@ import codecs
 import os.path
 import re
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
 
 def find_version(*file_paths):
@@ -20,11 +20,14 @@ setup(
     version=find_version("product_details", "__init__.py"),
     description="Product and locale details for Mozilla products.",
     long_description=open("README.rst").read(),
+    long_description_content_type="text/x-rst",
     author="Fred Wenzel",
     author_email="fwenzel@mozilla.com",
     url="https://github.com/mozilla/django-product-details/",
-    license="BSD",
-    packages=find_packages(),
+    license_expression="BSD-3-Clause",
+    # find_namespace_packages so that the product_details/json data directories
+    # (which have no __init__.py) are treated as packages and shipped.
+    packages=find_namespace_packages(include=["product_details", "product_details.*"]),
     include_package_data=True,
     zip_safe=False,
     python_requires=">=3.10",
@@ -35,7 +38,6 @@ setup(
         "Environment :: Web Environment :: Mozilla",
         "Framework :: Django",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

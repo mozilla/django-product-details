@@ -30,19 +30,25 @@ REQUIRED_FILES = (
 MIN_JSON_FILES = 100
 
 
-def json_members(names):
-    """Return the JSON paths (relative to product_details/json/) in a member list."""
+def json_members(names, strip_top_dir=False):
+    """
+    Return the JSON paths (relative to product_details/json/) in a member list.
+
+    Only files at the package's real location count. Wheel members are
+    relative to the archive root; sdist members live under a single
+    "<name>-<version>/" directory, which is stripped first.
+    """
     found = set()
     for name in names:
-        # sdist members are prefixed with the "<name>-<version>/" directory.
-        idx = name.find(JSON_PREFIX)
-        if idx != -1 and name.endswith(".json"):
-            found.add(name[idx + len(JSON_PREFIX):])
+        if strip_top_dir:
+            name = name.partition("/")[2]
+        if name.startswith(JSON_PREFIX) and name.endswith(".json"):
+            found.add(name[len(JSON_PREFIX):])
     return found
 
 
-def check(path, names):
-    found = json_members(names)
+def check(path, names, strip_top_dir=False):
+    found = json_members(names, strip_top_dir=strip_top_dir)
     problems = []
     if len(found) < MIN_JSON_FILES:
         problems.append(
@@ -73,7 +79,7 @@ def main(dist_dir="dist"):
             ok &= check(whl, zf.namelist())
     for sdist in sdists:
         with tarfile.open(sdist) as tf:
-            ok &= check(sdist, tf.getnames())
+            ok &= check(sdist, tf.getnames(), strip_top_dir=True)
     return 0 if ok else 1
 
 

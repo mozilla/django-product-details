@@ -2,8 +2,6 @@ import copy
 
 from django.test import SimpleTestCase
 
-from nose.tools import eq_
-
 from product_details.version_compare import (
     Version,
     version_dict,
@@ -70,16 +68,16 @@ class TestVersions(SimpleTestCase):
                 elif i > j:
                     assert v1 > v2, "%s is not greater than %s" % (v1, v2)
                 else:
-                    eq_(v1, v2)
+                    self.assertEqual(v1, v2)
 
         equal_vers = map(lambda v: Version(v), EQUALITY)
         for v1 in equal_vers:
             for v2 in equal_vers:
-                eq_(v1, v2)
+                self.assertEqual(v1, v2)
         equal_vers = map(lambda v: Version(v), EQUALITY_FF100)
         for v1 in equal_vers:
             for v2 in equal_vers:
-                eq_(v1, v2)
+                self.assertEqual(v1, v2)
 
     def test_simplify_version(self):
         """Make sure version simplification works."""
@@ -97,7 +95,7 @@ class TestVersions(SimpleTestCase):
         }
         for v in versions:
             ver = Version(v)
-            eq_(ver.simplified, versions[v])
+            self.assertEqual(ver.simplified, versions[v])
 
     def test_dict_vs_int(self):
         """
@@ -109,8 +107,8 @@ class TestVersions(SimpleTestCase):
         int1 = version_int(version_string)
         dict2 = version_dict(version_string)
         int2 = version_int(version_string)
-        eq_(dict1, dict2)
-        eq_(int1, int2)
+        self.assertEqual(dict1, dict2)
+        self.assertEqual(int1, int2)
 
     def test_dict_vs_int_ff100(self):
         """
@@ -122,8 +120,8 @@ class TestVersions(SimpleTestCase):
         int1 = version_int(version_string)
         dict2 = version_dict(version_string)
         int2 = version_int(version_string)
-        eq_(dict1, dict2)
-        eq_(int1, int2)
+        self.assertEqual(dict1, dict2)
+        self.assertEqual(int1, int2)
 
     def test_version_list(self):
         """Test if version lists are generated properly."""
@@ -140,6 +138,6 @@ class TestVersions(SimpleTestCase):
         test_list = version_list(my_versions, hide_below="4.0b1")
 
         # Check if the generated version list is the same as we expect.
-        eq_(len(expected), len(test_list))
+        self.assertEqual(len(expected), len(test_list))
         for n, v in enumerate(test_list):
-            eq_(v, expected[n])
+            self.assertEqual(v, expected[n])
